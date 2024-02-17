@@ -1,4 +1,4 @@
-# prople/jsonrpc
+# prople/jsonrpc/core
 
 In `Prople`, default `CCP (Client Communication Protocol)`, which is, a communication protocol from client's device or user's application, will be `JSONRPC`.
 
@@ -30,7 +30,7 @@ This library provides base abstraction to working with `JSONRPC` itself. The bas
 
 These abstractions designed following [JSON-RPC 2.0 Spec](https://www.jsonrpc.org/specification).
 
-Besides of these abstractions, the `prople/agent/jsonrpc` also provides the *rpc processor* too. This abstraction designed to handle each of rpc methods and its handler. 
+Besides of these abstractions, the `prople/jsonrpc/core` also provides the *rpc processor* too. This abstraction designed to handle each of rpc methods and its handler. 
 
 `Handler` abstraction
 
@@ -51,7 +51,7 @@ pub struct RpcProcessorObject {
 }
 ```
 
-These abstractions designed as a core `JSONRPC`, which we should not care about any of HTTP framework implementation which for now we're using `Tokio Axum`.
+These abstractions designed as a core `JSONRPC`, which we should not care about any of HTTP framework implementations. 
 
 By using core rpc abstraction, all abstraction and logic handler, will be separated from any specific frameworks, and it means, we can change the HTTP framework easily.
 
