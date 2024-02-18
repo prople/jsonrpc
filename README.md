@@ -3,7 +3,7 @@
 It's a `Rust Workspace` project that will contains two sub-projects (or crates):
 
 - `prople-jsonrpc-core`
-- `prople-jsonrpc-axum` (not developed yet)
+- `prople-jsonrpc-axum`
 
 ## prople-jsonrpc-core
 
