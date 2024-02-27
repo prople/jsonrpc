@@ -6,7 +6,7 @@ The reason why `JSONRPC` over `REST API` is because the `JSONRPC` more simpler t
 
 > A light weight remote procedure call protocol. It is designed to be simple!
 
-Source: https://www.jsonrpc.org/
+Source: <https://www.jsonrpc.org/>
 
 Example of rpc call:
 

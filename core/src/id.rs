@@ -1,6 +1,18 @@
 use rst_common::standard::serde::de::{self, Visitor};
 use rst_common::standard::serde::{self, Deserialize, Serialize};
 
+/// `RpcId` used to modeling the request and response `id`, which is an identifier
+///
+/// Taken from it's specs: <https://www.jsonrpc.org/specification#request_object>
+///
+/// > **About Id**
+/// >
+/// > An identifier established by the Client that MUST contain a String, Number, 
+/// > or NULL value if included. If it is not included it is assumed to be a notification. 
+/// > The value SHOULD normally not be Null and Numbers SHOULD NOT contain fractional parts
+///
+/// This object will implement [`serde::de::Visitor`] used to parse given json string and need to
+/// parse the `id` value based on it's type, an integer or a string
 #[derive(Debug, PartialEq)]
 pub enum RpcId {
     StringVal(String),

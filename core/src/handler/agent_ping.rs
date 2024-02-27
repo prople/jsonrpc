@@ -1,11 +1,11 @@
-use rst_common::with_errors::anyhow::Result;
 use rst_common::standard::async_trait::async_trait;
 use rst_common::standard::erased_serde::Serialize as ErasedSerialized;
 use rst_common::standard::serde::{self, Serialize};
 use rst_common::standard::serde_json::Value;
 
-use crate::types::RpcHandler;
+use crate::types::{RpcHandler, RpcError};
 
+/// `AgentPingResponse` used as main response object for the RPC method `ping`
 #[derive(Debug, Serialize)]
 #[serde(crate = "self::serde")]
 pub struct AgentPingResponse {
@@ -16,7 +16,7 @@ pub struct AgentPingHandler;
 
 #[async_trait]
 impl RpcHandler for AgentPingHandler {
-    async fn call(&self, _: Value) -> Result<Option<Box<dyn ErasedSerialized>>> {
+    async fn call(&self, _: Value) -> Result<Option<Box<dyn ErasedSerialized>>, RpcError> {
         let output = AgentPingResponse {
             message: String::from("pong!"),
         };

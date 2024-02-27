@@ -1,4 +1,5 @@
 use rst_common::standard::serde::{self, Deserialize, Serialize};
+use rst_common::with_errors::thiserror::Error;
 
 pub type RpcErrorCode = i64;
 pub type RpcErrorMessage = &'static str;
@@ -15,12 +16,23 @@ const METHOD_NOT_FOUND_MESSAGE: RpcErrorMessage = "Method not found";
 const INVALID_PARAMS_MESSAGE: RpcErrorMessage = "Invalid params";
 const INTERNAL_ERROR_MESSAGE: RpcErrorMessage = "Internal error";
 
-#[derive(Debug, Clone, Copy)]
+/// `RpcError` is the only error data structures, that should be 
+/// cover all required error types based on the `JSON-RPC` specification
+#[derive(Debug, Clone, Copy, Error)]
 pub enum RpcError {
+    #[error("something went wrong with parsing data")]
     ParseError,
+    
+    #[error("error invalid request")]
     InvalidRequest,
+    
+    #[error("error unknown method or method not found")]
     MethodNotFound,
+    
+    #[error("error invalid params")]
     InvalidParams,
+
+    #[error("internal error")]
     InternalError,
 }
 
@@ -36,6 +48,10 @@ impl RpcError {
     }
 }
 
+/// `RpcErrorObject` is an object designed to build the error response object
+/// 
+/// This method will only parse a [`RpcError`] enum variants, parse the error codes
+/// including for it's error message
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(crate = "self::serde")]
 pub struct RpcErrorObject<T> {

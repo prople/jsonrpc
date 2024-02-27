@@ -3,6 +3,9 @@ use rst_common::standard::serde::{self, Serialize};
 use crate::objects::RpcErrorObject;
 use crate::types::RpcId;
 
+/// `RpcResponseObject` used as modeling of `JSON-RPC` response model
+///
+/// Ref: <https://www.jsonrpc.org/specification#response_object>
 #[derive(Debug, Serialize)]
 #[serde(crate = "self::serde")]
 pub struct RpcResponseObject<T, E> {
@@ -18,6 +21,8 @@ pub struct RpcResponseObject<T, E> {
 }
 
 impl<T, E> RpcResponseObject<T, E> {
+    /// `with_success` is a helper function used to build [`RpcResponseObject`]
+    /// but only if in success condition
     pub fn with_success(result: Option<T>, id: Option<RpcId>) -> Self {
         RpcResponseObject {
             jsonrpc: String::from("2.0"),
@@ -27,6 +32,8 @@ impl<T, E> RpcResponseObject<T, E> {
         }
     }
 
+    /// `with_error` is a helper function used to build [`RpcResponseObject`]
+    /// used in error condition
     pub fn with_error(error: Option<RpcErrorObject<E>>, id: Option<RpcId>) -> Self {
         RpcResponseObject {
             jsonrpc: String::from("2.0"),

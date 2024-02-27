@@ -6,8 +6,10 @@ use crate::handlers::AgentPingHandler;
 use crate::objects::{RpcErrorObject, RpcRequestObject, RpcResponseObject};
 use crate::types::{RpcError, RpcHandler, RpcMethod};
 
+/// `RpcProcessorObject` is primary object to manage request method handlers including
+/// for its handler execution 
 pub struct RpcProcessorObject {
-    pub handlers: HashMap<RpcMethod, Box<dyn RpcHandler + Send + Sync>>,
+    handlers: HashMap<RpcMethod, Box<dyn RpcHandler + Send + Sync>>,
 }
 
 impl RpcProcessorObject {
@@ -18,6 +20,12 @@ impl RpcProcessorObject {
         RpcProcessorObject { handlers }
     }
 
+    /// `register_handler` used to register a RPC method's handler
+    ///
+    /// A `handler` is any object that MUST BE implement the [`RpcHandler`]
+    /// Besides of implement the trait, we also need to make sure that the handler itself
+    /// implement `Send` and `Sync` implicitly, because the handler will be thrown to some
+    /// background process asynchronously
     pub fn register_handler(
         &mut self,
         method: String,
@@ -26,6 +34,12 @@ impl RpcProcessorObject {
         self.handlers.insert(method, handler);
     }
 
+    /// `execute` used to process incoming [`RpcRequestObject]
+    ///
+    /// The internal flow is, for each time incoming request object
+    /// it will fetch the handler based on RPC method. 
+    /// If it have a handler, it will *call* the handler.
+    /// If not, it will build the [`RpcErrorObject`] and put it into the [`RpcResponseObject`]
     pub async fn execute(
         &self,
         request: RpcRequestObject,
@@ -51,7 +65,7 @@ impl RpcProcessorObject {
             Err(err) => {
                 error!("error from handler: {}", err.to_string());
                 let err_obj: RpcErrorObject<()> =
-                    RpcErrorObject::build(RpcError::InternalError, None);
+                    RpcErrorObject::build(err, None);
                 let response = RpcResponseObject::with_error(Some(err_obj), request.id);
                 response
             }
@@ -68,7 +82,6 @@ mod tests {
     use rst_common::standard::async_trait::async_trait;
     use rst_common::standard::serde_json::{self, Value};
     
-    use rst_common::with_errors::anyhow::{anyhow, Result};
     use rst_common::with_tests::mockall::{mock, predicate};
     use rst_common::with_tokio::tokio;
 
@@ -77,7 +90,7 @@ mod tests {
 
         #[async_trait]
         impl RpcHandler for Handler {
-            async fn call(&self, params: Value) -> Result<Option<Box<dyn ErasedSerialized>>> {
+            async fn call(&self, params: Value) -> Result<Option<Box<dyn ErasedSerialized>>, RpcError> {
                 let output = FakeParam{
                     key: String::from("test-key"),
                     value: String::from("test-value")
@@ -116,7 +129,7 @@ mod tests {
             .expect_call()
             .with(predicate::eq(Value::Null))
             .times(1)
-            .returning(|_| Err(anyhow!("error")));
+            .returning(|_| Err(RpcError::InvalidParams));
 
         let mut processor = RpcProcessorObject::build();
         processor.register_handler(String::from("test.mock"), Box::new(handler));
@@ -133,7 +146,7 @@ mod tests {
         let jsonstr = serde_json::to_string(&response);
         assert!(!jsonstr.is_err());
         assert_eq!(
-            r#"{"jsonrpc":"2.0","error":{"code":-32603,"message":"Internal error"},"id":1}"#,
+            r#"{"jsonrpc":"2.0","error":{"code":-32602,"message":"Invalid params"},"id":1}"#,
             jsonstr.unwrap()
         )
     }

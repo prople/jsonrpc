@@ -3,6 +3,9 @@ use rst_common::standard::serde_json::Value;
 
 use crate::types::RpcId;
 
+/// `RpcRequestObject` used to modeling `JSON-RPC` request spc model
+///
+/// Ref: <https://www.jsonrpc.org/specification#request_object>
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(crate = "self::serde")]
 pub struct RpcRequestObject {
