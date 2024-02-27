@@ -1,9 +1,10 @@
-use serde::Serialize;
+use rst_common::standard::serde::{self, Serialize};
 
 use crate::objects::RpcErrorObject;
 use crate::types::RpcId;
 
 #[derive(Debug, Serialize)]
+#[serde(crate = "self::serde")]
 pub struct RpcResponseObject<T, E> {
     pub jsonrpc: String,
 
@@ -39,9 +40,11 @@ impl<T, E> RpcResponseObject<T, E> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use rst_common::standard::serde_json;
     use crate::types::RpcError;
 
     #[derive(Serialize, Clone)]
+    #[serde(crate = "self::serde")]
     struct FakeParam {
         key: String,
         value: String,

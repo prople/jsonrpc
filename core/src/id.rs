@@ -1,5 +1,5 @@
-use serde::de::{self, Visitor};
-use serde::{Deserialize, Serialize};
+use rst_common::standard::serde::de::{self, Visitor};
+use rst_common::standard::serde::{self, Deserialize, Serialize};
 
 #[derive(Debug, PartialEq)]
 pub enum RpcId {

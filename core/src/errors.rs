@@ -1,4 +1,4 @@
-use rst_common::standard::serde::{Deserialize, Serialize};
+use rst_common::standard::serde::{self, Deserialize, Serialize};
 
 pub type RpcErrorCode = i64;
 pub type RpcErrorMessage = &'static str;
@@ -37,6 +37,7 @@ impl RpcError {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
+#[serde(crate = "self::serde")]
 pub struct RpcErrorObject<T> {
     pub code: RpcErrorCode,
     pub message: String,
@@ -58,9 +59,10 @@ impl<T> RpcErrorObject<T> {
 
 #[cfg(test)]
 mod tests {
-    use rst_common::with_tests::table_test::table_test;
-
     use super::*;
+    
+    use rst_common::standard::serde_json;
+    use rst_common::with_tests::table_test::table_test;
 
     #[test]
     fn test_build_error_enum() {

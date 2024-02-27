@@ -1,9 +1,10 @@
-use serde::{Deserialize, Serialize};
-use serde_json::Value;
+use rst_common::standard::serde::{self, Deserialize, Serialize};
+use rst_common::standard::serde_json::Value;
 
 use crate::types::RpcId;
 
 #[derive(Debug, Serialize, Deserialize)]
+#[serde(crate = "self::serde")]
 pub struct RpcRequestObject {
     pub jsonrpc: String,
     pub method: String,
@@ -16,7 +17,7 @@ pub struct RpcRequestObject {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use serde_json::{json, Error};
+    use rst_common::standard::serde_json::{self, json, Error};
 
     #[test]
     fn test_serialize_request_object() {

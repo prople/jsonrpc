@@ -61,15 +61,16 @@ impl RpcProcessorObject {
 
 #[cfg(test)]
 mod tests {
+    use super::*;
+    
     use crate::types::RpcId;
 
-    use rst_common::with_errors::anyhow::{anyhow, Result};
     use rst_common::standard::async_trait::async_trait;
+    use rst_common::standard::serde_json::{self, Value};
+    
+    use rst_common::with_errors::anyhow::{anyhow, Result};
     use rst_common::with_tests::mockall::{mock, predicate};
-    use rst_common::standard::serde_json::Value;
     use rst_common::with_tokio::tokio;
-
-    use super::*;
 
     mock! {
         Handler {}

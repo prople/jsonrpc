@@ -1,12 +1,13 @@
 use rst_common::with_errors::anyhow::Result;
 use rst_common::standard::async_trait::async_trait;
 use rst_common::standard::erased_serde::Serialize as ErasedSerialized;
-use rst_common::standard::serde::Serialize;
+use rst_common::standard::serde::{self, Serialize};
 use rst_common::standard::serde_json::Value;
 
 use crate::types::RpcHandler;
 
 #[derive(Debug, Serialize)]
+#[serde(crate = "self::serde")]
 pub struct AgentPingResponse {
     message: String,
 }
@@ -26,6 +27,8 @@ impl RpcHandler for AgentPingHandler {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    use rst_common::standard::serde_json;
     use rst_common::with_tokio::tokio;
 
     #[tokio::test]
