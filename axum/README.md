@@ -6,14 +6,13 @@ Usages:
 
 ```rust
 use tokio;
-use tokio::sync::watch::{self, Receiver, Sender};
-use prople_jsonrpc_axum::{Config, RpcState, run_rpc};
+use prople_jsonrpc_axum::{Config, RpcState, run_rpc, build_canceller};
 
 #[tokio:main]
 async fn main() {
     let cfg = Config { ... };
     let state = RpcState { ... };
-    let (_, rx) = watch::channel(0);
+    let (_, rx) = build_canceller(0);
 
     run_rpc(cfg, state, rx).await;
 }
