@@ -12,7 +12,4 @@ license = "GPL-3.0-only"
 
 [dependencies]
 rst-common = {version = "1.1.0", features = ["standard", "with-errors", "with-tokio", "with-http-tokio", "with-tracing"]}
-thiserror = {version = "1.0.57"}
-serde = {"version" = "~1", features = ["derive"] }
-serde_json = {"version" = "~1"}
 prople-jsonrpc-core = {version = "1.0.0", path = "../core"}

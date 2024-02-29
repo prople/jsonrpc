@@ -6,7 +6,7 @@ use crate::types::RpcId;
 /// `RpcResponseObject` used as modeling of `JSON-RPC` response model
 ///
 /// Ref: <https://www.jsonrpc.org/specification#response_object>
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Clone)]
 #[serde(crate = "self::serde")]
 pub struct RpcResponseObject<T, E> {
     pub jsonrpc: String,

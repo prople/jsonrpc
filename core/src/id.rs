@@ -13,7 +13,7 @@ use rst_common::standard::serde::{self, Deserialize, Serialize};
 ///
 /// This object will implement [`serde::de::Visitor`] used to parse given json string and need to
 /// parse the `id` value based on it's type, an integer or a string
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum RpcId {
     StringVal(String),
     IntegerVal(u64),

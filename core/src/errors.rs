@@ -4,17 +4,17 @@ use rst_common::with_errors::thiserror::Error;
 pub type RpcErrorCode = i64;
 pub type RpcErrorMessage = &'static str;
 
-const PARSE_ERROR_CODE: RpcErrorCode = -32700;
-const INVALID_REQUEST_CODE: RpcErrorCode = -32600;
-const METHOD_NOT_FOUND_CODE: RpcErrorCode = -32601;
-const INVALID_PARAMS_CODE: RpcErrorCode = -32602;
-const INTERNAL_ERROR_CODE: RpcErrorCode = -32603;
+pub const PARSE_ERROR_CODE: RpcErrorCode = -32700;
+pub const INVALID_REQUEST_CODE: RpcErrorCode = -32600;
+pub const METHOD_NOT_FOUND_CODE: RpcErrorCode = -32601;
+pub const INVALID_PARAMS_CODE: RpcErrorCode = -32602;
+pub const INTERNAL_ERROR_CODE: RpcErrorCode = -32603;
 
-const PARSE_ERROR_MESSAGE: RpcErrorMessage = "Parse error";
-const INVALID_REQUEST_MESSAGE: RpcErrorMessage = "Invalid request";
-const METHOD_NOT_FOUND_MESSAGE: RpcErrorMessage = "Method not found";
-const INVALID_PARAMS_MESSAGE: RpcErrorMessage = "Invalid params";
-const INTERNAL_ERROR_MESSAGE: RpcErrorMessage = "Internal error";
+pub const PARSE_ERROR_MESSAGE: RpcErrorMessage = "Parse error";
+pub const INVALID_REQUEST_MESSAGE: RpcErrorMessage = "Invalid request";
+pub const METHOD_NOT_FOUND_MESSAGE: RpcErrorMessage = "Method not found";
+pub const INVALID_PARAMS_MESSAGE: RpcErrorMessage = "Invalid params";
+pub const INTERNAL_ERROR_MESSAGE: RpcErrorMessage = "Internal error";
 
 /// `RpcError` is the only error data structures, that should be 
 /// cover all required error types based on the `JSON-RPC` specification
@@ -52,7 +52,7 @@ impl RpcError {
 /// 
 /// This method will only parse a [`RpcError`] enum variants, parse the error codes
 /// including for it's error message
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(crate = "self::serde")]
 pub struct RpcErrorObject<T> {
     pub code: RpcErrorCode,

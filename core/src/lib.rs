@@ -25,7 +25,7 @@ pub mod handlers {
 pub mod types {
     use super::*;
 
-    pub use errors::{RpcError, RpcErrorCode, RpcErrorMessage};
+    pub use errors::*;
     pub use id::RpcId;
     pub use processor::types::{RpcHandler, RpcMethod};
 }

@@ -142,7 +142,6 @@ mod tests {
         };
 
         let response = processor.execute(request).await;
-
         let jsonstr = serde_json::to_string(&response);
         assert!(!jsonstr.is_err());
         assert_eq!(
