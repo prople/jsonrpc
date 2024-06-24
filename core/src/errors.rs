@@ -48,13 +48,13 @@ impl RpcError {
     }
 }
 
-/// `RpcErrorObject` is an object designed to build the error response object
+/// `RpcErrorBuilder` is an object designed to build the error response object
 /// 
 /// This method will only parse a [`RpcError`] enum variants, parse the error codes
 /// including for it's error message
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(crate = "self::serde")]
-pub struct RpcErrorObject<T> {
+pub struct RpcErrorBuilder<T> {
     pub code: RpcErrorCode,
     pub message: String,
 
@@ -62,10 +62,10 @@ pub struct RpcErrorObject<T> {
     pub data: Option<T>,
 }
 
-impl<T> RpcErrorObject<T> {
+impl<T> RpcErrorBuilder<T> {
     pub fn build(err: RpcError, data: Option<T>) -> Self {
         let (code, message) = err.build();
-        RpcErrorObject {
+        RpcErrorBuilder {
             code,
             message: message.to_string(),
             data,
@@ -141,7 +141,7 @@ mod tests {
         ];
 
         for (validator, input, expected) in table_test!(table) {
-            let err: RpcErrorObject<String> = RpcErrorObject::build(input, None);
+            let err: RpcErrorBuilder<String> = RpcErrorBuilder::build(input, None);
             let errobj = serde_json::to_string(&err);
             assert!(!errobj.is_err());
 

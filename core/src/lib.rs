@@ -10,10 +10,10 @@ mod response;
 pub mod objects {
     use super::*;
 
-    pub use errors::RpcErrorObject;
-    pub use processor::RpcProcessorObject;
-    pub use request::RpcRequestObject;
-    pub use response::RpcResponseObject;
+    pub use errors::RpcErrorBuilder;
+    pub use processor::RpcProcessor;
+    pub use request::RpcRequest;
+    pub use response::RpcResponse;
 }
 
 pub mod handlers {

@@ -8,7 +8,7 @@ use crate::types::RpcId;
 /// Ref: <https://www.jsonrpc.org/specification#request_object>
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(crate = "self::serde")]
-pub struct RpcRequestObject {
+pub struct RpcRequest {
     pub jsonrpc: String,
     pub method: String,
     pub params: Value,
@@ -24,7 +24,7 @@ mod tests {
 
     #[test]
     fn test_serialize_request_object() {
-        let payload = RpcRequestObject {
+        let payload = RpcRequest {
             id: Some(RpcId::IntegerVal(1)),
             jsonrpc: String::from("2.0"),
             params: json!([1, 2]),
@@ -40,7 +40,7 @@ mod tests {
 
     #[test]
     fn test_serialize_request_object_optional_id() {
-        let payload = RpcRequestObject {
+        let payload = RpcRequest {
             id: None,
             jsonrpc: String::from("2.0"),
             params: json!([1, 2]),
@@ -57,7 +57,7 @@ mod tests {
     #[test]
     fn test_deserialize_with_id() {
         let jsonstr = r#"{"jsonrpc":"2.0","method":"testing","params":[1,2], "id": 1}"#;
-        let jsonobj: Result<RpcRequestObject, Error> = serde_json::from_str(jsonstr);
+        let jsonobj: Result<RpcRequest, Error> = serde_json::from_str(jsonstr);
 
         assert!(!jsonobj.is_err());
 
@@ -74,7 +74,7 @@ mod tests {
     #[test]
     fn test_deserialize_with_fake_param() {
         let jsonstr = r#"{"jsonrpc":"2.0","method":"testing","params": {"key": "testkey", "value": "testvalue"}, "id": 1}"#;
-        let jsonobj: Result<RpcRequestObject, Error> = serde_json::from_str(jsonstr);
+        let jsonobj: Result<RpcRequest, Error> = serde_json::from_str(jsonstr);
 
         assert!(!jsonobj.is_err());
         let payload = jsonobj.unwrap();
@@ -86,7 +86,7 @@ mod tests {
     #[test]
     fn test_deserialize_without_id() {
         let jsonstr = r#"{"jsonrpc":"2.0","method":"testing","params":[1,2]}"#;
-        let jsonobj: Result<RpcRequestObject, Error> = serde_json::from_str(jsonstr);
+        let jsonobj: Result<RpcRequest, Error> = serde_json::from_str(jsonstr);
         assert!(!jsonobj.is_err());
 
         let jsonreq = jsonobj.unwrap();

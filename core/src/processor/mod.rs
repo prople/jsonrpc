@@ -1,7 +1,7 @@
 mod base;
 mod rpc;
 
-pub use rpc::RpcProcessorObject;
+pub use rpc::RpcProcessor;
 
 pub mod types {
     use super::*;

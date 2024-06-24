@@ -1,6 +1,6 @@
 use rst_common::standard::serde::{self, Serialize};
 
-use crate::objects::RpcErrorObject;
+use crate::objects::RpcErrorBuilder;
 use crate::types::RpcId;
 
 /// `RpcResponseObject` used as modeling of `JSON-RPC` response model
@@ -8,23 +8,23 @@ use crate::types::RpcId;
 /// Ref: <https://www.jsonrpc.org/specification#response_object>
 #[derive(Debug, Serialize, Clone)]
 #[serde(crate = "self::serde")]
-pub struct RpcResponseObject<T, E> {
+pub struct RpcResponse<T, E> {
     pub jsonrpc: String,
 
     #[serde(skip_serializing_if = "Option::is_none")]
     pub result: Option<T>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub error: Option<RpcErrorObject<E>>,
+    pub error: Option<RpcErrorBuilder<E>>,
 
     pub id: Option<RpcId>,
 }
 
-impl<T, E> RpcResponseObject<T, E> {
-    /// `with_success` is a helper function used to build [`RpcResponseObject`]
+impl<T, E> RpcResponse<T, E> {
+    /// `with_success` is a helper function used to build [`RpcResponse`]
     /// but only if in success condition
     pub fn with_success(result: Option<T>, id: Option<RpcId>) -> Self {
-        RpcResponseObject {
+        RpcResponse {
             jsonrpc: String::from("2.0"),
             result,
             error: None,
@@ -32,10 +32,10 @@ impl<T, E> RpcResponseObject<T, E> {
         }
     }
 
-    /// `with_error` is a helper function used to build [`RpcResponseObject`]
+    /// `with_error` is a helper function used to build [`RpcResponse`]
     /// used in error condition
-    pub fn with_error(error: Option<RpcErrorObject<E>>, id: Option<RpcId>) -> Self {
-        RpcResponseObject {
+    pub fn with_error(error: Option<RpcErrorBuilder<E>>, id: Option<RpcId>) -> Self {
+        RpcResponse {
             jsonrpc: String::from("2.0"),
             result: None,
             error,
@@ -64,8 +64,8 @@ mod tests {
             value: String::from("testvalue"),
         };
 
-        let response: RpcResponseObject<FakeParam, String> =
-            RpcResponseObject::with_success(Some(result), None);
+        let response: RpcResponse<FakeParam, String> =
+            RpcResponse::with_success(Some(result), None);
         let jsonstr = serde_json::to_string(&response);
         assert!(!jsonstr.is_err());
         assert_eq!(
@@ -76,9 +76,9 @@ mod tests {
 
     #[test]
     fn test_serialize_response_object_with_error() {
-        let err = RpcErrorObject::build(RpcError::MethodNotFound, None);
-        let response: RpcResponseObject<FakeParam, String> =
-            RpcResponseObject::with_error(Some(err), None);
+        let err = RpcErrorBuilder::build(RpcError::MethodNotFound, None);
+        let response: RpcResponse<FakeParam, String> =
+            RpcResponse::with_error(Some(err), None);
         let jsonstr = serde_json::to_string(&response);
         assert!(!jsonstr.is_err());
         assert_eq!(
