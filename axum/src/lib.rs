@@ -21,14 +21,14 @@ use rst_common::with_http_tokio::tower::Service;
 use rst_common::with_http_tokio::tower_http::timeout::TimeoutLayer;
 use rst_common::with_http_tokio::tower_http::trace::{self, TraceLayer};
 
-use prople_jsonrpc_core::objects::{RpcProcessorObject, RpcRequestObject, RpcResponseObject};
+use prople_jsonrpc_core::objects::{RpcProcessor, RpcRequest, RpcResponse};
 use prople_jsonrpc_core::types::*;
 
 /// `RpcState` used to setup our internal state object that will be used for the 
 /// request logic
 #[derive(Clone)]
 pub struct RpcState {
-    pub processor: Arc<RpcProcessorObject>,
+    pub processor: Arc<RpcProcessor>,
 }
 
 /// `Config` used to modify our RPC HTTP engine behaviors
@@ -40,10 +40,10 @@ pub struct Config {
 
 async fn rpc_handler(
     State(state): State<Arc<RpcState>>,
-    Json(payload): Json<RpcRequestObject>,
+    Json(payload): Json<RpcRequest>,
 ) -> (
     StatusCode,
-    Json<RpcResponseObject<Box<dyn ErasedSerialized>, ()>>,
+    Json<RpcResponse<Box<dyn ErasedSerialized>, ()>>,
 ) {
     let processor = state.processor.clone();
     let response = processor.execute(payload).await;
