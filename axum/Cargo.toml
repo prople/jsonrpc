@@ -14,4 +14,4 @@ doctest = false
 
 [dependencies]
 rst-common = {version = "~1", features = ["standard", "with-errors", "with-tokio", "with-http-tokio", "with-tracing"]}
-prople-jsonrpc-core = {version = "~0.1", path = "../core"}
+prople-jsonrpc-core = {version = "~0.1"}
