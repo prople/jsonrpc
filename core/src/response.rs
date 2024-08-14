@@ -1,4 +1,4 @@
-use rst_common::standard::serde::{self, Serialize};
+use rst_common::standard::serde::{self, Serialize, Deserialize};
 
 use crate::objects::RpcErrorBuilder;
 use crate::types::RpcId;
@@ -6,7 +6,7 @@ use crate::types::RpcId;
 /// `RpcResponseObject` used as modeling of `JSON-RPC` response model
 ///
 /// Ref: <https://www.jsonrpc.org/specification#response_object>
-#[derive(Debug, Serialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(crate = "self::serde")]
 pub struct RpcResponse<T, E> {
     pub jsonrpc: String,
