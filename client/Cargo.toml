@@ -5,7 +5,6 @@ edition = "2021"
 description = "A library for the JSON-RPC HTTP client"
 repository = "https://github.com/prople/jsonrpc/client"
 authors.workspace = true
-categories.workspace = true
 rust-version.workspace = true
 license.workspace = true
 
