@@ -1,4 +1,4 @@
-use rst_common::standard::serde::{self, Serialize, Deserialize};
+use rst_common::standard::serde::{self, Deserialize, Serialize};
 
 use crate::objects::RpcErrorBuilder;
 use crate::types::RpcId;
@@ -47,10 +47,10 @@ impl<T, E> RpcResponse<T, E> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use rst_common::standard::serde_json;
     use crate::types::RpcError;
+    use rst_common::standard::serde_json;
 
-    #[derive(Serialize, Clone)]
+    #[derive(Serialize, Deserialize, Clone)]
     #[serde(crate = "self::serde")]
     struct FakeParam {
         key: String,
@@ -75,10 +75,31 @@ mod tests {
     }
 
     #[test]
+    fn test_deserialize_response_success() {
+        let result = FakeParam {
+            key: String::from("testkey"),
+            value: String::from("testvalue"),
+        };
+
+        let response: RpcResponse<FakeParam, String> =
+            RpcResponse::with_success(Some(result.clone()), None);
+        let jsonstr = serde_json::to_string(&response);
+        assert!(!jsonstr.is_err());
+
+        let output: Result<RpcResponse<FakeParam, String>, serde_json::Error> =
+            serde_json::from_str(jsonstr.unwrap().as_str());
+
+        assert!(!output.is_err());
+
+        let output_obj = output.unwrap();
+        assert_eq!(output_obj.clone().result.unwrap().key, result.key);
+        assert_eq!(output_obj.result.unwrap().value, result.value)
+    }
+
+    #[test]
     fn test_serialize_response_object_with_error() {
         let err = RpcErrorBuilder::build(RpcError::MethodNotFound, None);
-        let response: RpcResponse<FakeParam, String> =
-            RpcResponse::with_error(Some(err), None);
+        let response: RpcResponse<FakeParam, String> = RpcResponse::with_error(Some(err), None);
         let jsonstr = serde_json::to_string(&response);
         assert!(!jsonstr.is_err());
         assert_eq!(

@@ -7,8 +7,8 @@ use rst_common::standard::serde::{self, Deserialize, Serialize};
 ///
 /// > **About Id**
 /// >
-/// > An identifier established by the Client that MUST contain a String, Number, 
-/// > or NULL value if included. If it is not included it is assumed to be a notification. 
+/// > An identifier established by the Client that MUST contain a String, Number,
+/// > or NULL value if included. If it is not included it is assumed to be a notification.
 /// > The value SHOULD normally not be Null and Numbers SHOULD NOT contain fractional parts
 ///
 /// This object will implement [`serde::de::Visitor`] used to parse given json string and need to

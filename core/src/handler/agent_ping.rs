@@ -3,7 +3,7 @@ use rst_common::standard::erased_serde::Serialize as ErasedSerialized;
 use rst_common::standard::serde::{self, Serialize};
 use rst_common::standard::serde_json::Value;
 
-use crate::types::{RpcHandler, RpcError};
+use crate::types::{RpcError, RpcHandler};
 
 /// `AgentPingResponse` used as main response object for the RPC method `ping`
 #[derive(Debug, Serialize)]

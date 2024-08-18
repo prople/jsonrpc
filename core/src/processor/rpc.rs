@@ -7,7 +7,7 @@ use crate::objects::{RpcErrorBuilder, RpcRequest, RpcResponse};
 use crate::types::{RpcError, RpcHandler, RpcMethod};
 
 /// `RpcProcessor` is primary object to manage request method handlers including
-/// for its handler execution 
+/// for its handler execution
 pub struct RpcProcessor {
     handlers: HashMap<RpcMethod, Box<dyn RpcHandler + Send + Sync>>,
 }
@@ -37,13 +37,10 @@ impl RpcProcessor {
     /// `execute` used to process incoming [`RpcRequest]
     ///
     /// The internal flow is, for each time incoming request object
-    /// it will fetch the handler based on RPC method. 
+    /// it will fetch the handler based on RPC method.
     /// If it have a handler, it will *call* the handler.
     /// If not, it will build the [`RpcErrorObject`] and put it into the [`RpcResponse`]
-    pub async fn execute(
-        &self,
-        request: RpcRequest,
-    ) -> RpcResponse<Box<dyn ErasedSerialized>, ()> {
+    pub async fn execute(&self, request: RpcRequest) -> RpcResponse<Box<dyn ErasedSerialized>, ()> {
         let method = request.method.clone();
         let params = request.params.clone();
 
@@ -64,8 +61,7 @@ impl RpcProcessor {
             }
             Err(err) => {
                 error!("error from handler: {}", err.to_string());
-                let err_obj: RpcErrorBuilder<()> =
-                    RpcErrorBuilder::build(err, None);
+                let err_obj: RpcErrorBuilder<()> = RpcErrorBuilder::build(err, None);
                 let response = RpcResponse::with_error(Some(err_obj), request.id);
                 response
             }
@@ -76,13 +72,13 @@ impl RpcProcessor {
 #[cfg(test)]
 mod tests {
     use super::*;
-    
-    use mockall::*;
+
     use crate::types::RpcId;
+    use mockall::*;
 
     use rst_common::standard::async_trait::async_trait;
     use rst_common::standard::serde_json::{self, Value};
-    
+
     use rst_common::with_tokio::tokio;
 
     mock! {

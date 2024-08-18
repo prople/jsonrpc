@@ -16,19 +16,19 @@ pub const METHOD_NOT_FOUND_MESSAGE: RpcErrorMessage = "Method not found";
 pub const INVALID_PARAMS_MESSAGE: RpcErrorMessage = "Invalid params";
 pub const INTERNAL_ERROR_MESSAGE: RpcErrorMessage = "Internal error";
 
-/// `RpcError` is the only error data structures, that should be 
+/// `RpcError` is the only error data structures, that should be
 /// cover all required error types based on the `JSON-RPC` specification
 #[derive(Debug, Clone, Copy, Error)]
 pub enum RpcError {
     #[error("something went wrong with parsing data")]
     ParseError,
-    
+
     #[error("error invalid request")]
     InvalidRequest,
-    
+
     #[error("error unknown method or method not found")]
     MethodNotFound,
-    
+
     #[error("error invalid params")]
     InvalidParams,
 
@@ -49,7 +49,7 @@ impl RpcError {
 }
 
 /// `RpcErrorBuilder` is an object designed to build the error response object
-/// 
+///
 /// This method will only parse a [`RpcError`] enum variants, parse the error codes
 /// including for it's error message
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -76,7 +76,7 @@ impl<T> RpcErrorBuilder<T> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    
+
     use rst_common::standard::serde_json;
     use rst_common::with_tests::table_test::table_test;
 
