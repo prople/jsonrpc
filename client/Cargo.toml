@@ -1,0 +1,21 @@
+[package]
+name = "prople-jsonrpc-client"
+version = "0.1.0"
+edition = "2021"
+description = "A library for the JSON-RPC HTTP client"
+authors.workspace = true
+categories.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+prople-jsonrpc-core.workspace = true
+rst-common = {version = "~1", features = ["standard", "with-errors", "with-tokio", "with-logging"]}
+reqwest = { version = "0.12", features = ["json"] }
+
+[dev-dependencies]
+rst-common = {version = "~1", features = ["with-tests"]}
+mockall = {version = "~0.12"}
+mockito = {version = "1.5.0"}
