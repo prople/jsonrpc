@@ -2,7 +2,7 @@ use prople_jsonrpc_core::objects::RpcResponse;
 use prople_jsonrpc_core::types::RpcId;
 
 use rst_common::standard::async_trait::async_trait;
-use rst_common::standard::serde::Deserialize;
+use rst_common::standard::serde::de::DeserializeOwned;
 use rst_common::standard::serde_json::Value;
 use rst_common::with_errors::thiserror::{self, Error};
 
@@ -31,9 +31,9 @@ pub trait RpcValue<'life0>: Send + Sync + Clone {
 #[async_trait]
 pub trait Executor<'life0, T>
 where
-    T: Deserialize<'life0> + Send + Sync,
+    T: DeserializeOwned + Send + Sync,
 {
-    type ErrorData: Deserialize<'life0> + Send + Sync;
+    type ErrorData: DeserializeOwned + Send + Sync;
 
     async fn call<'life1>(
         &'life0 self,
