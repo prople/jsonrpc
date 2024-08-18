@@ -13,7 +13,6 @@ license.workspace = true
 [dependencies]
 prople-jsonrpc-core.workspace = true
 rst-common = {version = "~1", features = ["standard", "with-errors", "with-tokio", "with-logging"]}
-reqwest = { version = "~0.12", features = ["json"] }
 
 [dev-dependencies]
 rst-common = {version = "~1", features = ["with-tests"]}

@@ -1,8 +1,7 @@
 use std::fmt::Debug;
 use std::marker::PhantomData;
 
-use reqwest::{Client, StatusCode};
-
+use rst_common::standard::reqwest::{Client, StatusCode};
 use rst_common::standard::async_trait::async_trait;
 use rst_common::standard::serde::de::DeserializeOwned;
 
