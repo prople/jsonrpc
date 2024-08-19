@@ -5,44 +5,42 @@ use rst_common::standard::reqwest::{Client, StatusCode};
 use rst_common::standard::async_trait::async_trait;
 use rst_common::standard::serde::de::DeserializeOwned;
 
-use prople_jsonrpc_core::objects::{RpcRequest, RpcResponse};
+use prople_jsonrpc_core::objects::RpcRequest;
 use prople_jsonrpc_core::types::RpcId;
 
-use crate::types::{Executor, ExecutorError, RpcValue};
+use crate::types::{Executor, ExecutorError, JSONResponse, RpcValue};
 
-pub struct Reqwest<'life0, T, E> {
+pub struct Reqwest<T, E> {
     client: Client,
-    _phantom0: PhantomData<&'life0 T>,
-    _phantom1: PhantomData<&'life0 E>,
+    _phantom0: PhantomData<T>,
+    _phantom1: PhantomData<E>
 }
 
-impl<'life0, T, E> Reqwest<'life0, T, E> {
+impl<T, E> Reqwest<T, E> {
     pub fn new() -> Self {
         Self {
             client: Client::new(),
             _phantom0: PhantomData::default(),
-            _phantom1: PhantomData::default(),
+            _phantom1: PhantomData::default()
         }
     }
 }
 
 #[async_trait]
-impl<'life0, T, E> Executor<'life0, T> for Reqwest<'life0, T, E>
+impl<T, E> Executor<T> for Reqwest<T, E>
 where
     T: DeserializeOwned + Send + Sync + Debug,
     E: DeserializeOwned + Send + Sync,
 {
     type ErrorData = E;
 
-    async fn call<'life1>(
-        &'life0 self,
-        endpoint: &'life0 str,
-        params: impl RpcValue<'life1>,
-        method: &'life0 str,
+    async fn call(
+        &self,
+        endpoint: String,
+        params: impl RpcValue,
+        method: String,
         id: Option<RpcId>,
-    ) -> Result<RpcResponse<T, Self::ErrorData>, ExecutorError>
-    where
-        'life1: 'life0,
+    ) -> Result<JSONResponse<T, E>, ExecutorError>
     {
         let value_params = params.build_serde_value()?;
 
@@ -55,7 +53,7 @@ where
 
         let res = self
             .client
-            .post(endpoint)
+            .post(endpoint.clone())
             .json(&request)
             .send()
             .await
@@ -68,15 +66,15 @@ where
                 };
 
                 ExecutorError::RequestError {
-                    url: &endpoint,
+                    url: endpoint,
                     code,
                 }
             })?;
 
         let resp_json = res
-            .json::<RpcResponse<T, Self::ErrorData>>()
+            .json::<JSONResponse<T, Self::ErrorData>>()
             .await
-            .map_err(|_| ExecutorError::ParseResponseError("unable to parse json response"))?;
+            .map_err(|_| ExecutorError::ParseResponseError("unable to parse json response".to_string()))?;
 
         Ok(resp_json)
     }
@@ -95,10 +93,8 @@ mod tests {
 
     #[derive(Serialize, Deserialize, Clone, Debug)]
     #[serde(crate = "self::serde")]
-    struct FakePayload<'life0> {
+    struct FakePayload {
         msg: String,
-        #[serde(skip_serializing)]
-        _phantom0: PhantomData<&'life0 ()>,
     }
 
     #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -113,13 +109,11 @@ mod tests {
         msg: String,
     }
 
-    impl<'life0> RpcValue<'life0> for FakePayload<'life0> {
-        fn build_serde_value<'life1>(&self) -> Result<Value, ExecutorError<'life1>>
-        where
-            'life1: 'life0,
+    impl RpcValue for FakePayload {
+        fn build_serde_value(&self) -> Result<Value, ExecutorError>
         {
             serde_json::to_value(self)
-                .map_err(|_| ExecutorError::BuildValueError("unable to build value"))
+                .map_err(|_| ExecutorError::BuildValueError("unable to build value".to_string()))
         }
     }
 
@@ -134,7 +128,6 @@ mod tests {
     async fn test_call_success() {
         let payload = FakePayload {
             msg: "hello world".to_string(),
-            _phantom0: PhantomData::default(),
         };
 
         let try_jsonvalue = serde_json::to_value(payload.clone());
@@ -149,12 +142,14 @@ mod tests {
         };
 
         let request_payload_value = serde_json::to_value(request_payload).unwrap();
-        let jsonresp = RpcResponse::<FakeResponse, FakeError>::with_success(
-            Some(FakeResponse {
-                msg: "hello response".to_string(),
+        let jsonresp: JSONResponse<FakeResponse, FakeErrorData> = JSONResponse{
+            id: Some(RpcId::IntegerVal(1)),
+            result: Some(FakeResponse{
+                msg: "hello response".to_string()
             }),
-            Some(RpcId::IntegerVal(1)),
-        );
+            error: None,
+            jsonrpc: String::from("2.0")
+        };
 
         let jsonresp_str_builder = serde_json::to_string(&jsonresp);
         assert!(!jsonresp_str_builder.is_err());
@@ -175,9 +170,9 @@ mod tests {
         let client = Reqwest::<FakeResponse, FakeErrorData>::new();
         let resp = client
             .call(
-                endpoint.as_str(),
+                endpoint,
                 payload,
-                "test.rpc",
+                "test.rpc".to_string(),
                 Some(RpcId::IntegerVal(1)),
             )
             .await;
@@ -196,7 +191,6 @@ mod tests {
     async fn test_call_error() {
         let payload = FakePayload {
             msg: "hello world".to_string(),
-            _phantom0: PhantomData::default(),
         };
 
         let try_jsonvalue = serde_json::to_value(payload.clone());
@@ -218,10 +212,13 @@ mod tests {
             }),
         );
 
-        let jsonresp = RpcResponse::<FakeResponse, FakeErrorData>::with_error(
-            Some(error_response),
-            Some(RpcId::IntegerVal(1)),
-        );
+        let jsonresp: JSONResponse<FakeResponse, FakeErrorData> = JSONResponse{
+            error: Some(error_response),
+            id: Some(RpcId::IntegerVal(1)),
+            jsonrpc: String::from("2.0"),
+            result: None
+        };
+
         let jsonresp_str_builder = serde_json::to_string(&jsonresp);
         assert!(!jsonresp_str_builder.is_err());
 
@@ -241,9 +238,9 @@ mod tests {
         let client = Reqwest::<FakeResponse, FakeErrorData>::new();
         let resp = client
             .call(
-                endpoint.as_str(),
+                endpoint,
                 payload,
-                "test.rpc",
+                "test.rpc".to_string(),
                 Some(RpcId::IntegerVal(1)),
             )
             .await;
@@ -266,7 +263,6 @@ mod tests {
     async fn test_call_parse_invalid_response() {
         let payload = FakePayload {
             msg: "hello world".to_string(),
-            _phantom0: PhantomData::default(),
         };
 
         let try_jsonvalue = serde_json::to_value(payload.clone());
@@ -298,9 +294,9 @@ mod tests {
         let client = Reqwest::<FakeResponse, FakeErrorData>::new();
         let resp = client
             .call(
-                endpoint.as_str(),
+                endpoint,
                 payload,
-                "test.rpc",
+                "test.rpc".to_string(),
                 Some(RpcId::IntegerVal(1)),
             )
             .await;
