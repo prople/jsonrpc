@@ -4,5 +4,11 @@ It's an HTTP JSON-RPC client implementation. This package will depends on `propl
 components will use same data structure, especially for the:
 
 - `RpcRequest`
-- `RpcResponse`
 - `RpcError`
+
+> WARNING
+>
+> Although this package depends on `prople-jsonrpc-core`, there is some known bug for the `serde` implementation `Deserialized`
+> which unable to detect the trait implementation.
+>
+> Ref: https://github.com/serde-rs/serde-rs.github.io/commit/0009ee2ed4e8083d0a450bb387bbbf17eadbc018
