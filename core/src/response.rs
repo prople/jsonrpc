@@ -57,6 +57,12 @@ mod tests {
         value: String,
     }
 
+    #[derive(Serialize, Deserialize, Clone)]
+    #[serde(crate = "self::serde")]
+    struct FakeError {
+        msg: String
+    }
+
     #[test]
     fn test_serialize_response_object_with_success() {
         let result = FakeParam {
@@ -94,6 +100,26 @@ mod tests {
         let output_obj = output.unwrap();
         assert_eq!(output_obj.clone().result.unwrap().key, result.key);
         assert_eq!(output_obj.result.unwrap().value, result.value)
+    }
+
+    #[test]
+    fn test_deserialize_response_error() {
+        let err = RpcErrorBuilder::build(RpcError::MethodNotFound, Some(FakeError{
+            msg: "error msg".to_string()
+        }));
+
+        let response: RpcResponse<FakeParam, FakeError> = RpcResponse::with_error(Some(err), None);
+        let jsonstr = serde_json::to_string(&response);
+        assert!(!jsonstr.is_err());
+
+        let output = serde_json::from_str::<RpcResponse<FakeParam, FakeError>>(&jsonstr.unwrap());
+        assert!(!output.is_err());
+
+        let err_output = output.unwrap();
+        assert!(err_output.error.is_some());
+
+        let err_fake = err_output.error.unwrap();
+        assert_eq!(err_fake.data.unwrap().msg, "error msg")
     }
 
     #[test]
