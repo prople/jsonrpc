@@ -1,8 +1,8 @@
 use std::fmt::Debug;
 use std::marker::PhantomData;
 
-use rst_common::standard::reqwest::{Client, StatusCode};
 use rst_common::standard::async_trait::async_trait;
+use rst_common::standard::reqwest::{Client, StatusCode};
 use rst_common::standard::serde::de::DeserializeOwned;
 
 use prople_jsonrpc_core::objects::RpcRequest;
@@ -11,18 +11,26 @@ use prople_jsonrpc_core::types::RpcId;
 use crate::types::{Executor, ExecutorError, JSONResponse, RpcValue};
 
 #[derive(Clone)]
-pub struct Reqwest<T, E> {
+pub struct Reqwest<T, E>
+where
+    T: Clone,
+    E: Clone,
+{
     client: Client,
     _phantom0: PhantomData<T>,
-    _phantom1: PhantomData<E>
+    _phantom1: PhantomData<E>,
 }
 
-impl<T, E> Reqwest<T, E> {
+impl<T, E> Reqwest<T, E>
+where
+    T: Clone,
+    E: Clone,
+{
     pub fn new() -> Self {
         Self {
             client: Client::new(),
             _phantom0: PhantomData::default(),
-            _phantom1: PhantomData::default()
+            _phantom1: PhantomData::default(),
         }
     }
 }
@@ -30,8 +38,8 @@ impl<T, E> Reqwest<T, E> {
 #[async_trait]
 impl<T, E> Executor<T> for Reqwest<T, E>
 where
-    T: DeserializeOwned + Send + Sync + Debug,
-    E: DeserializeOwned + Send + Sync,
+    T: DeserializeOwned + Send + Sync + Debug + Clone,
+    E: DeserializeOwned + Send + Sync + Clone,
 {
     type ErrorData = E;
 
@@ -41,8 +49,7 @@ where
         params: impl RpcValue,
         method: String,
         id: Option<RpcId>,
-    ) -> Result<JSONResponse<T, E>, ExecutorError>
-    {
+    ) -> Result<JSONResponse<T, E>, ExecutorError> {
         let value_params = params.build_serde_value()?;
 
         let request = RpcRequest {
@@ -75,7 +82,9 @@ where
         let resp_json = res
             .json::<JSONResponse<T, Self::ErrorData>>()
             .await
-            .map_err(|_| ExecutorError::ParseResponseError("unable to parse json response".to_string()))?;
+            .map_err(|_| {
+                ExecutorError::ParseResponseError("unable to parse json response".to_string())
+            })?;
 
         Ok(resp_json)
     }
@@ -111,8 +120,7 @@ mod tests {
     }
 
     impl RpcValue for FakePayload {
-        fn build_serde_value(&self) -> Result<Value, ExecutorError>
-        {
+        fn build_serde_value(&self) -> Result<Value, ExecutorError> {
             serde_json::to_value(self)
                 .map_err(|_| ExecutorError::BuildValueError("unable to build value".to_string()))
         }
@@ -143,13 +151,13 @@ mod tests {
         };
 
         let request_payload_value = serde_json::to_value(request_payload).unwrap();
-        let jsonresp: JSONResponse<FakeResponse, FakeErrorData> = JSONResponse{
+        let jsonresp: JSONResponse<FakeResponse, FakeErrorData> = JSONResponse {
             id: Some(RpcId::IntegerVal(1)),
-            result: Some(FakeResponse{
-                msg: "hello response".to_string()
+            result: Some(FakeResponse {
+                msg: "hello response".to_string(),
             }),
             error: None,
-            jsonrpc: String::from("2.0")
+            jsonrpc: String::from("2.0"),
         };
 
         let jsonresp_str_builder = serde_json::to_string(&jsonresp);
@@ -213,11 +221,11 @@ mod tests {
             }),
         );
 
-        let jsonresp: JSONResponse<FakeResponse, FakeErrorData> = JSONResponse{
+        let jsonresp: JSONResponse<FakeResponse, FakeErrorData> = JSONResponse {
             error: Some(error_response),
             id: Some(RpcId::IntegerVal(1)),
             jsonrpc: String::from("2.0"),
-            result: None
+            result: None,
         };
 
         let jsonresp_str_builder = serde_json::to_string(&jsonresp);

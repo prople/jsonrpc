@@ -1,7 +1,7 @@
-use prople_jsonrpc_core::types::{RpcId, RpcErrorBuilder};
+use prople_jsonrpc_core::types::{RpcErrorBuilder, RpcId};
 
 use rst_common::standard::async_trait::async_trait;
-use rst_common::standard::serde::{self, de::DeserializeOwned, Serialize, Deserialize};
+use rst_common::standard::serde::{self, de::DeserializeOwned, Deserialize, Serialize};
 use rst_common::standard::serde_json::Value;
 use rst_common::with_errors::thiserror::{self, Error};
 
@@ -25,7 +25,11 @@ pub trait RpcValue: Send + Sync + Clone {
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(crate = "self::serde")]
-pub struct JSONResponse<T, E> {
+pub struct JSONResponse<T, E>
+where
+    T: Clone,
+    E: Clone,
+{
     pub jsonrpc: String,
 
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -42,11 +46,11 @@ pub struct JSONResponse<T, E> {
 #[async_trait]
 pub trait Executor<T>
 where
-    T: DeserializeOwned + Send + Sync,
+    T: DeserializeOwned + Send + Sync + Clone,
 {
-    type ErrorData: DeserializeOwned + Send + Sync;
+    type ErrorData: DeserializeOwned + Send + Sync + Clone;
 
-    async fn call<>(
+    async fn call(
         &self,
         endpoint: String,
         params: impl RpcValue,
