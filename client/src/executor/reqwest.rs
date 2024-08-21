@@ -10,6 +10,7 @@ use prople_jsonrpc_core::types::RpcId;
 
 use crate::types::{Executor, ExecutorError, JSONResponse, RpcValue};
 
+#[derive(Clone)]
 pub struct Reqwest<T, E> {
     client: Client,
     _phantom0: PhantomData<T>,
