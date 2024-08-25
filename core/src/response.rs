@@ -60,7 +60,7 @@ mod tests {
     #[derive(Serialize, Deserialize, Clone)]
     #[serde(crate = "self::serde")]
     struct FakeError {
-        msg: String
+        msg: String,
     }
 
     #[test]
@@ -104,9 +104,12 @@ mod tests {
 
     #[test]
     fn test_deserialize_response_error() {
-        let err = RpcErrorBuilder::build(RpcError::MethodNotFound, Some(FakeError{
-            msg: "error msg".to_string()
-        }));
+        let err = RpcErrorBuilder::build(
+            RpcError::MethodNotFound,
+            Some(FakeError {
+                msg: "error msg".to_string(),
+            }),
+        );
 
         let response: RpcResponse<FakeParam, FakeError> = RpcResponse::with_error(Some(err), None);
         let jsonstr = serde_json::to_string(&response);

@@ -6,12 +6,13 @@ use rst_common::standard::serde_json::Value;
 use crate::types::{RpcError, RpcHandler};
 
 /// `AgentPingResponse` used as main response object for the RPC method `ping`
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Clone)]
 #[serde(crate = "self::serde")]
 pub struct AgentPingResponse {
     message: String,
 }
 
+#[derive(Clone)]
 pub struct AgentPingHandler;
 
 #[async_trait]
