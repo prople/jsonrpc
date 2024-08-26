@@ -1,6 +1,6 @@
 [package]
 name = "prople-jsonrpc-axum"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 authors = ["rstlix0x0 <rstlix.dev@gmail.com>"]
 repository = "https://github.com/prople/jsonrpc/core"
@@ -13,5 +13,5 @@ license = "GPL-3.0-only"
 doctest = false
 
 [dependencies]
+prople-jsonrpc-core.workspace = true
 rst-common = {version = "~1", features = ["standard", "with-errors", "with-tokio", "with-http-tokio", "with-tracing"]}
-prople-jsonrpc-core = {version = "~0.1"}
