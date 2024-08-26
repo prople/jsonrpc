@@ -27,7 +27,7 @@ pub mod types {
 
     pub use errors::*;
     pub use id::RpcId;
-    pub use processor::types::{RpcController, RpcHandler, RpcMethod};
+    pub use processor::types::{RpcController, RpcHandler, RpcMethod, RpcHandlerBoxed, RpcResponseSerialized};
 }
 
 pub mod prelude {

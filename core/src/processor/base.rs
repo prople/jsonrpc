@@ -4,6 +4,12 @@ use rst_common::standard::serde_json::Value;
 
 use crate::types::RpcError;
 
+/// `HandlerBoxed` is an alias type used as shortcut to the boxed handler type 
+pub type HandlerBoxed = Box<dyn Handler + Send + Sync>;
+
+// `ResponseSerialized` is an alias type used as shortcut to the serialized response 
+pub type ResponseSerialized = Box<dyn ErasedSerialized>;
+
 /// `Handler` is the only main trait that designed to be implemented by any
 /// request handlers
 #[async_trait]
@@ -15,7 +21,7 @@ pub trait Handler {
     /// > The given resut MUST BE any data types that already implement `serde::Serialize`.
     /// > The problem is, `serde` doesn't provide (or even already remove the feature) to this
     /// > kind of traits, so that's the reason why we're using `erased_serde::Serialize`
-    async fn call(&self, params: Value) -> Result<Option<Box<dyn ErasedSerialized>>, RpcError>;
+    async fn call(&self, params: Value) -> Result<Option<ResponseSerialized>, RpcError>;
 }
 
 #[derive(Clone, PartialEq, Hash, Eq)]
@@ -48,7 +54,7 @@ where
         self.method.clone()
     }
 
-    pub fn handler_boxed(&self) -> Box<dyn Handler> {
+    pub fn handler_boxed(&self) -> HandlerBoxed {
         let handler = self.handler.clone();
         Box::new(handler)
     }

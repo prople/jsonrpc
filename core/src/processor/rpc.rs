@@ -1,21 +1,20 @@
 use std::collections::HashMap;
 
-use rst_common::standard::erased_serde::Serialize as ErasedSerialized;
 use rst_common::with_logging::log::error;
 
 use crate::handlers::AgentPingHandler;
 use crate::objects::{RpcErrorBuilder, RpcRequest, RpcResponse};
-use crate::types::{RpcController, RpcError, RpcHandler, RpcMethod};
+use crate::types::{RpcController, RpcError, RpcHandler, RpcHandlerBoxed, RpcMethod, RpcResponseSerialized};
 
 /// `RpcProcessor` is primary object to manage request method handlers including
 /// for its handler execution
 pub struct RpcProcessor {
-    handlers: HashMap<RpcMethod, Box<dyn RpcHandler>>,
+    handlers: HashMap<RpcMethod, RpcHandlerBoxed>,
 }
 
 impl Default for RpcProcessor {
     fn default() -> Self {
-        let mut handlers: HashMap<RpcMethod, Box<dyn RpcHandler>> = HashMap::new();
+        let mut handlers: HashMap<RpcMethod, RpcHandlerBoxed> = HashMap::new();
         handlers.insert(
             RpcMethod("prople.agent.ping".to_string()),
             Box::new(AgentPingHandler),
@@ -27,7 +26,7 @@ impl Default for RpcProcessor {
 
 impl RpcProcessor {
     pub fn new() -> Self {
-        let handlers: HashMap<RpcMethod, Box<dyn RpcHandler>> = HashMap::new();
+        let handlers: HashMap<RpcMethod, RpcHandlerBoxed> = HashMap::new();
         Self { handlers }
     }
 
@@ -47,7 +46,7 @@ impl RpcProcessor {
     /// Besides of implement the trait, we also need to make sure that the handler itself
     /// implement `Send` and `Sync` implicitly, because the handler will be thrown to some
     /// background process asynchronously
-    pub fn register_handler(&mut self, method: String, handler: Box<dyn RpcHandler>) -> () {
+    pub fn register_handler(&mut self, method: String, handler: RpcHandlerBoxed) -> () {
         self.handlers.insert(RpcMethod(method), handler);
     }
 
@@ -57,7 +56,7 @@ impl RpcProcessor {
     /// it will fetch the handler based on RPC method.
     /// If it have a handler, it will *call* the handler.
     /// If not, it will build the [`RpcErrorObject`] and put it into the [`RpcResponse`]
-    pub async fn execute(&self, request: RpcRequest) -> RpcResponse<Box<dyn ErasedSerialized>, ()> {
+    pub async fn execute(&self, request: RpcRequest) -> RpcResponse<RpcResponseSerialized, ()> {
         let method = RpcMethod(request.method.clone());
         let params = request.params.clone();
 
@@ -104,7 +103,7 @@ mod tests {
 
         #[async_trait]
         impl RpcHandler for Handler {
-            async fn call(&self, params: Value) -> Result<Option<Box<dyn ErasedSerialized>>, RpcError> {
+            async fn call(&self, params: Value) -> Result<Option<RpcResponseSerialized>, RpcError> {
                 let output = FakeParam{
                     key: String::from("test-key"),
                     value: String::from("test-value")
