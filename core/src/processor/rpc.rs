@@ -4,7 +4,9 @@ use rst_common::with_logging::log::error;
 
 use crate::handlers::AgentPingHandler;
 use crate::objects::{RpcErrorBuilder, RpcRequest, RpcResponse};
-use crate::types::{RpcController, RpcError, RpcHandler, RpcHandlerBoxed, RpcMethod, RpcResponseSerialized};
+use crate::types::{
+    RpcController, RpcError, RpcHandler, RpcHandlerBoxed, RpcMethod, RpcResponseSerialized,
+};
 
 /// `RpcProcessor` is primary object to manage request method handlers including
 /// for its handler execution
@@ -31,7 +33,7 @@ impl RpcProcessor {
     }
 
     /// `register_controller` used to register given [`RpcController`] to the current registry
-    pub fn register_controller<T>(&mut self, controller: RpcController<T>) -> &Self
+    pub fn register_controller<T>(&mut self, controller: RpcController<T>) -> &mut Self
     where
         T: RpcHandler + Send + Sync + Clone + 'static,
     {
@@ -48,6 +50,13 @@ impl RpcProcessor {
     /// background process asynchronously
     pub fn register_handler(&mut self, method: String, handler: RpcHandlerBoxed) -> () {
         self.handlers.insert(RpcMethod(method), handler);
+    }
+
+    /// `handlers` used to get current saved hash map
+    ///
+    /// The return value will be in shared reference without any mutability capability
+    pub fn handlers(&self) -> &HashMap<RpcMethod, RpcHandlerBoxed> {
+        &self.handlers
     }
 
     /// `execute` used to process incoming [`RpcRequest]
@@ -140,6 +149,27 @@ mod tests {
             r#"{"jsonrpc":"2.0","result":{"message":"pong!"},"id":1}"#,
             jsonstr.unwrap()
         )
+    }
+
+    #[tokio::test]
+    async fn test_processor_register_multiple_controllers() {
+        let mut mock_handler = MockHandler::new();
+        mock_handler
+            .expect_clone()
+            .times(1)
+            .returning(|| MockHandler::new());
+
+        let ping_controller = RpcController::new("prople.agent.ping".to_string(), AgentPingHandler);
+
+        let mock_controller = RpcController::new(String::from("mock.handler"), mock_handler);
+
+        let mut processor = RpcProcessor::new();
+        processor
+            .register_controller(ping_controller)
+            .register_controller(mock_controller);
+
+        let handlers = processor.handlers();
+        assert_eq!(handlers.len(), 2)
     }
 
     #[tokio::test]

@@ -4,10 +4,10 @@ use rst_common::standard::serde_json::Value;
 
 use crate::types::RpcError;
 
-/// `HandlerBoxed` is an alias type used as shortcut to the boxed handler type 
+/// `HandlerBoxed` is an alias type used as shortcut to the boxed handler type
 pub type HandlerBoxed = Box<dyn Handler + Send + Sync>;
 
-// `ResponseSerialized` is an alias type used as shortcut to the serialized response 
+// `ResponseSerialized` is an alias type used as shortcut to the serialized response
 pub type ResponseSerialized = Box<dyn ErasedSerialized>;
 
 /// `Handler` is the only main trait that designed to be implemented by any
@@ -28,7 +28,7 @@ pub trait Handler {
 pub struct Method(pub String);
 
 /// `Controller` is an object used to wrap between the RPC method and its controller
-/// 
+///
 /// By using this object, we can create a standalone object which then register it to the
 /// processor
 pub struct Controller<T>
