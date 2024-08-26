@@ -1,6 +1,6 @@
 [package]
 name = "prople-jsonrpc-core"
-version = "0.2.1"
+version = "0.2.2"
 edition = "2021"
 authors = ["rstlix0x0 <rstlix.dev@gmail.com>"]
 repository = "https://github.com/prople/jsonrpc/core"
