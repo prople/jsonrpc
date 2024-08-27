@@ -4,9 +4,7 @@ use rst_common::with_logging::log::error;
 
 use crate::handlers::AgentPingHandler;
 use crate::objects::{RpcErrorBuilder, RpcRequest, RpcResponse};
-use crate::types::{
-    RpcController, RpcError, RpcHandler, RpcHandlerBoxed, RpcMethod, RpcResponseSerialized,
-};
+use crate::types::{RpcError, RpcHandlerBoxed, RpcMethod, RpcResponseSerialized, RpcRoute};
 
 /// `RpcProcessor` is primary object to manage request method handlers including
 /// for its handler execution
@@ -18,7 +16,7 @@ impl Default for RpcProcessor {
     fn default() -> Self {
         let mut handlers: HashMap<RpcMethod, RpcHandlerBoxed> = HashMap::new();
         handlers.insert(
-            RpcMethod("prople.agent.ping".to_string()),
+            RpcMethod::from("prople.agent.ping"),
             Box::new(AgentPingHandler),
         );
 
@@ -33,23 +31,10 @@ impl RpcProcessor {
     }
 
     /// `register_controller` used to register given [`RpcController`] to the current registry
-    pub fn register_controller<T>(&mut self, controller: RpcController<T>) -> &mut Self
-    where
-        T: RpcHandler + Send + Sync + Clone + 'static,
-    {
-        self.handlers
-            .insert(controller.method(), controller.handler_boxed());
+    pub fn register_route(&mut self, route: RpcRoute) -> &mut Self {
+        let controller = route.controller();
+        self.handlers.insert(route.method(), controller);
         self
-    }
-
-    /// `register_handler` used to register a RPC method's handler
-    ///
-    /// A `handler` is any object that MUST BE implement the [`RpcHandler`]
-    /// Besides of implement the trait, we also need to make sure that the handler itself
-    /// implement `Send` and `Sync` implicitly, because the handler will be thrown to some
-    /// background process asynchronously
-    pub fn register_handler(&mut self, method: String, handler: RpcHandlerBoxed) -> () {
-        self.handlers.insert(RpcMethod(method), handler);
     }
 
     /// `handlers` used to get current saved hash map
@@ -66,7 +51,7 @@ impl RpcProcessor {
     /// If it have a handler, it will *call* the handler.
     /// If not, it will build the [`RpcErrorObject`] and put it into the [`RpcResponse`]
     pub async fn execute(&self, request: RpcRequest) -> RpcResponse<RpcResponseSerialized, ()> {
-        let method = RpcMethod(request.method.clone());
+        let method = RpcMethod::from(request.method.clone());
         let params = request.params.clone();
 
         let handler = match self.handlers.get(&method) {
@@ -105,6 +90,7 @@ mod tests {
 
     use rst_common::with_tokio::tokio;
 
+    use crate::processor::types::RpcHandler;
     use crate::types::RpcId;
 
     mock! {
@@ -136,10 +122,13 @@ mod tests {
             params: Value::Null,
         };
 
-        let ping_controller = RpcController::new("prople.agent.ping".to_string(), AgentPingHandler);
+        let ping_controller = Box::new(AgentPingHandler);
         let mut processor = RpcProcessor::new();
         let response = processor
-            .register_controller(ping_controller)
+            .register_route(RpcRoute::new(
+                RpcMethod::from(String::from("prople.agent.ping")),
+                ping_controller,
+            ))
             .execute(request)
             .await;
 
@@ -159,14 +148,19 @@ mod tests {
             .times(1)
             .returning(|| MockHandler::new());
 
-        let ping_controller = RpcController::new("prople.agent.ping".to_string(), AgentPingHandler);
-
-        let mock_controller = RpcController::new(String::from("mock.handler"), mock_handler);
+        let ping_controller = Box::new(AgentPingHandler);
+        let mock_controller = Box::new(mock_handler);
 
         let mut processor = RpcProcessor::new();
         processor
-            .register_controller(ping_controller)
-            .register_controller(mock_controller);
+            .register_route(RpcRoute::new(
+                RpcMethod::from("prople.agent.ping"),
+                ping_controller,
+            ))
+            .register_route(RpcRoute::new(
+                RpcMethod::from("mock.handler"),
+                mock_controller,
+            ));
 
         let handlers = processor.handlers();
         assert_eq!(handlers.len(), 2)
@@ -196,14 +190,22 @@ mod tests {
     async fn test_processor_handler_error() {
         let mut handler = MockHandler::new();
 
-        handler
-            .expect_call()
-            .with(predicate::eq(Value::Null))
-            .times(1)
-            .returning(|_| Err(RpcError::InvalidParams));
+        handler.expect_clone().returning(|| {
+            let mut copied = MockHandler::new();
+            copied
+                .expect_call()
+                .with(predicate::eq(Value::Null))
+                .times(1)
+                .returning(|_| Err(RpcError::InvalidParams));
+
+            copied
+        });
 
         let mut processor = RpcProcessor::default();
-        processor.register_handler(String::from("test.mock"), Box::new(handler));
+        processor.register_route(RpcRoute::new(
+            RpcMethod::from("test.mock"),
+            Box::new(handler),
+        ));
 
         let request = RpcRequest {
             id: Some(RpcId::IntegerVal(1)),
