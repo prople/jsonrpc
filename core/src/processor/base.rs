@@ -72,6 +72,7 @@ impl Controller {
 }
 
 /// `Route` used to register an [`Method`] with its [`Controller`]
+#[derive(Clone)]
 pub struct Route {
     method: Method,
     controller: Controller,
