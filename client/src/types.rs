@@ -59,14 +59,14 @@ where
     pub fn extract_err(&self) -> Result<RpcErrorBuilder<E>, ExecutorError> {
         match &self.error {
             Some(err) => Ok(err.to_owned()),
-            None => Err(ExecutorError::MissingError)
+            None => Err(ExecutorError::MissingError),
         }
     }
 
     pub fn extract_result(&self) -> Result<T, ExecutorError> {
         match &self.result {
             Some(result) => Ok(result.to_owned()),
-            None => Err(ExecutorError::MissingResult) 
+            None => Err(ExecutorError::MissingResult),
         }
     }
 }
