@@ -14,8 +14,11 @@ impl Clone for HandlerBoxed {
     }
 }
 
-// `ResponseSerialized` is an alias type used as shortcut to the serialized response
+/// `ResponseSerialized` is an alias type used as shortcut to the serialized response
 pub type ResponseSerialized = Box<dyn ErasedSerialized>;
+
+/// `HandlerOutput` is an alias type used as shortcut type to the handler's output type signature
+pub type HandlerOutput = Result<Option<ResponseSerialized>, RpcError>;
 
 /// `Handler` is the only main trait that designed to be implemented by any
 /// request handlers
@@ -31,7 +34,7 @@ pub trait Handler: DynClone {
     /// > The given resut MUST BE any data types that already implement `serde::Serialize`.
     /// > The problem is, `serde` doesn't provide (or even already remove the feature) to this
     /// > kind of traits, so that's the reason why we're using `erased_serde::Serialize`
-    async fn call(&self, params: Value) -> Result<Option<ResponseSerialized>, RpcError>;
+    async fn call(&self, params: Value) -> HandlerOutput;
 }
 
 #[derive(Clone, PartialEq, Hash, Eq)]

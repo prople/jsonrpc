@@ -92,7 +92,7 @@ mod tests {
 
     use crate::processor::types::RpcHandler;
     use crate::types::RpcId;
-
+    
     mock! {
         Handler {}
 

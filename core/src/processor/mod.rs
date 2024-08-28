@@ -12,4 +12,5 @@ pub mod types {
     pub use base::Method as RpcMethod;
     pub use base::ResponseSerialized as RpcResponseSerialized;
     pub use base::Route as RpcRoute;
+    pub use base::HandlerOutput as RpcHandlerOutput;
 }
