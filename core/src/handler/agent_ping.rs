@@ -3,7 +3,9 @@ use rst_common::standard::erased_serde::Serialize as ErasedSerialized;
 use rst_common::standard::serde::{self, Serialize};
 use rst_common::standard::serde_json::Value;
 
-use crate::types::{RpcError, RpcHandler};
+use crate::types::{RpcError, RpcHandler, RpcMethod};
+
+pub const PING_RPC_METHOD: &str = "prople.vessel.ping";
 
 /// `AgentPingResponse` used as main response object for the RPC method `ping`
 #[derive(Debug, Serialize, Clone)]
@@ -17,7 +19,11 @@ pub struct AgentPingHandler;
 
 #[async_trait]
 impl RpcHandler for AgentPingHandler {
-    async fn call(&self, _: Value) -> Result<Option<Box<dyn ErasedSerialized>>, RpcError> {
+    async fn call(
+        &self,
+        _: RpcMethod,
+        _: Value,
+    ) -> Result<Option<Box<dyn ErasedSerialized>>, RpcError> {
         let output = AgentPingResponse {
             message: String::from("pong!"),
         };
@@ -35,7 +41,9 @@ mod tests {
     #[tokio::test]
     async fn test_agent_ping_call() {
         let handler = AgentPingHandler;
-        let response = handler.call(Value::Null).await;
+        let response = handler
+            .call(RpcMethod::from(PING_RPC_METHOD), Value::Null)
+            .await;
 
         match response {
             Ok(resp) => match resp {

@@ -1,3 +1,1 @@
-mod agent_ping;
-
-pub use agent_ping::AgentPingHandler;
+pub mod agent_ping;

@@ -34,10 +34,10 @@ pub trait Handler: DynClone {
     /// > The given resut MUST BE any data types that already implement `serde::Serialize`.
     /// > The problem is, `serde` doesn't provide (or even already remove the feature) to this
     /// > kind of traits, so that's the reason why we're using `erased_serde::Serialize`
-    async fn call(&self, params: Value) -> HandlerOutput;
+    async fn call(&self, method: Method, params: Value) -> HandlerOutput;
 }
 
-#[derive(Clone, PartialEq, Hash, Eq)]
+#[derive(Clone, PartialEq, Hash, Eq, Debug)]
 pub struct Method(String);
 
 impl From<&str> for Method {

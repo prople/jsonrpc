@@ -19,7 +19,7 @@ pub mod objects {
 pub mod handlers {
     use super::*;
 
-    pub use handler::AgentPingHandler;
+    pub use handler::agent_ping::{AgentPingHandler, PING_RPC_METHOD};
 }
 
 pub mod types {
@@ -28,7 +28,8 @@ pub mod types {
     pub use errors::*;
     pub use id::RpcId;
     pub use processor::types::{
-        RpcController, RpcHandler, RpcHandlerBoxed, RpcMethod, RpcResponseSerialized, RpcRoute, RpcHandlerOutput,
+        RpcController, RpcHandler, RpcHandlerBoxed, RpcHandlerOutput, RpcMethod,
+        RpcResponseSerialized, RpcRoute,
     };
 }
 

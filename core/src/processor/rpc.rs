@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use rst_common::with_logging::log::error;
 
-use crate::handlers::AgentPingHandler;
+use crate::handlers::{AgentPingHandler, PING_RPC_METHOD};
 use crate::objects::{RpcErrorBuilder, RpcRequest, RpcResponse};
 use crate::types::{RpcError, RpcHandlerBoxed, RpcMethod, RpcResponseSerialized, RpcRoute};
 
@@ -15,10 +15,7 @@ pub struct RpcProcessor {
 impl Default for RpcProcessor {
     fn default() -> Self {
         let mut handlers: HashMap<RpcMethod, RpcHandlerBoxed> = HashMap::new();
-        handlers.insert(
-            RpcMethod::from("prople.agent.ping"),
-            Box::new(AgentPingHandler),
-        );
+        handlers.insert(RpcMethod::from(PING_RPC_METHOD), Box::new(AgentPingHandler));
 
         RpcProcessor { handlers }
     }
@@ -64,7 +61,7 @@ impl RpcProcessor {
             }
         };
 
-        match handler.call(params).await {
+        match handler.call(method, params).await {
             Ok(success) => {
                 let response = RpcResponse::with_success(success, request.id);
                 response
@@ -92,13 +89,13 @@ mod tests {
 
     use crate::processor::types::RpcHandler;
     use crate::types::RpcId;
-    
+
     mock! {
         Handler {}
 
         #[async_trait]
         impl RpcHandler for Handler {
-            async fn call(&self, params: Value) -> Result<Option<RpcResponseSerialized>, RpcError> {
+            async fn call(&self, method: RpcMethod, params: Value) -> Result<Option<RpcResponseSerialized>, RpcError> {
                 let output = FakeParam{
                     key: String::from("test-key"),
                     value: String::from("test-value")
@@ -118,7 +115,7 @@ mod tests {
         let request = RpcRequest {
             id: Some(RpcId::IntegerVal(1)),
             jsonrpc: String::from("2.0"),
-            method: String::from("prople.agent.ping"),
+            method: String::from(PING_RPC_METHOD),
             params: Value::Null,
         };
 
@@ -126,7 +123,7 @@ mod tests {
         let mut processor = RpcProcessor::new();
         let response = processor
             .register_route(RpcRoute::new(
-                RpcMethod::from(String::from("prople.agent.ping")),
+                RpcMethod::from(String::from(PING_RPC_METHOD)),
                 ping_controller,
             ))
             .execute(request)
@@ -154,7 +151,7 @@ mod tests {
         let mut processor = RpcProcessor::new();
         processor
             .register_route(RpcRoute::new(
-                RpcMethod::from("prople.agent.ping"),
+                RpcMethod::from(PING_RPC_METHOD),
                 ping_controller,
             ))
             .register_route(RpcRoute::new(
@@ -172,7 +169,7 @@ mod tests {
         let request = RpcRequest {
             id: Some(RpcId::IntegerVal(1)),
             jsonrpc: String::from("2.0"),
-            method: String::from("prople.agent.ping"),
+            method: String::from(PING_RPC_METHOD),
             params: Value::Null,
         };
 
@@ -194,9 +191,12 @@ mod tests {
             let mut copied = MockHandler::new();
             copied
                 .expect_call()
-                .with(predicate::eq(Value::Null))
+                .with(
+                    predicate::eq(RpcMethod::from("test.mock")),
+                    predicate::eq(Value::Null),
+                )
                 .times(1)
-                .returning(|_| Err(RpcError::InvalidParams));
+                .returning(|_, _| Err(RpcError::InvalidParams));
 
             copied
         });
