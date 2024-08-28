@@ -1,6 +1,6 @@
 [package]
 name = "prople-jsonrpc-axum"
-version = "0.1.3"
+version = "0.1.4"
 edition = "2021"
 authors = ["rstlix0x0 <rstlix.dev@gmail.com>"]
 repository = "https://github.com/prople/jsonrpc/core"
