@@ -1,5 +1,5 @@
 use rst_common::standard::serde::{self, Deserialize, Serialize};
-use rst_common::with_errors::thiserror::Error;
+use rst_common::with_errors::thiserror::{self, Error};
 
 pub type RpcErrorCode = i64;
 pub type RpcErrorMessage = &'static str;
@@ -18,7 +18,7 @@ pub const INTERNAL_ERROR_MESSAGE: RpcErrorMessage = "Internal error";
 
 /// `RpcError` is the only error data structures, that should be
 /// cover all required error types based on the `JSON-RPC` specification
-#[derive(Debug, Clone, Copy, Error)]
+#[derive(Debug, Clone, Error)]
 pub enum RpcError {
     #[error("something went wrong with parsing data")]
     ParseError,
@@ -34,16 +34,20 @@ pub enum RpcError {
 
     #[error("internal error")]
     InternalError,
+
+    #[error("handler error: {0}")]
+    HandlerError(String)
 }
 
 impl RpcError {
-    pub fn build(&self) -> (RpcErrorCode, RpcErrorMessage) {
+    pub fn build(&self) -> (RpcErrorCode, String) {
         match self {
-            RpcError::ParseError => (PARSE_ERROR_CODE, PARSE_ERROR_MESSAGE),
-            RpcError::MethodNotFound => (METHOD_NOT_FOUND_CODE, METHOD_NOT_FOUND_MESSAGE),
-            RpcError::InvalidRequest => (INVALID_REQUEST_CODE, INVALID_REQUEST_MESSAGE),
-            RpcError::InvalidParams => (INVALID_PARAMS_CODE, INVALID_PARAMS_MESSAGE),
-            RpcError::InternalError => (INTERNAL_ERROR_CODE, INTERNAL_ERROR_MESSAGE),
+            RpcError::ParseError => (PARSE_ERROR_CODE, PARSE_ERROR_MESSAGE.to_string()),
+            RpcError::MethodNotFound => (METHOD_NOT_FOUND_CODE, METHOD_NOT_FOUND_MESSAGE.to_string()),
+            RpcError::InvalidRequest => (INVALID_REQUEST_CODE, INVALID_REQUEST_MESSAGE.to_string()),
+            RpcError::InvalidParams => (INVALID_PARAMS_CODE, INVALID_PARAMS_MESSAGE.to_string()),
+            RpcError::InternalError => (INTERNAL_ERROR_CODE, INTERNAL_ERROR_MESSAGE.to_string()),
+            RpcError::HandlerError(herr) => (INTERNAL_ERROR_CODE, herr.clone()) 
         }
     }
 }
@@ -85,23 +89,23 @@ mod tests {
         let table = vec![
             (
                 RpcError::ParseError,
-                (PARSE_ERROR_CODE, PARSE_ERROR_MESSAGE),
+                (PARSE_ERROR_CODE, PARSE_ERROR_MESSAGE.to_string()),
             ),
             (
                 RpcError::InvalidRequest,
-                (INVALID_REQUEST_CODE, INVALID_REQUEST_MESSAGE),
+                (INVALID_REQUEST_CODE, INVALID_REQUEST_MESSAGE.to_string()),
             ),
             (
                 RpcError::MethodNotFound,
-                (METHOD_NOT_FOUND_CODE, METHOD_NOT_FOUND_MESSAGE),
+                (METHOD_NOT_FOUND_CODE, METHOD_NOT_FOUND_MESSAGE.to_string()),
             ),
             (
                 RpcError::InvalidParams,
-                (INVALID_PARAMS_CODE, INVALID_PARAMS_MESSAGE),
+                (INVALID_PARAMS_CODE, INVALID_PARAMS_MESSAGE.to_string()),
             ),
             (
                 RpcError::InternalError,
-                (INTERNAL_ERROR_CODE, INTERNAL_ERROR_MESSAGE),
+                (INTERNAL_ERROR_CODE, INTERNAL_ERROR_MESSAGE.to_string()),
             ),
         ];
 
@@ -141,7 +145,7 @@ mod tests {
         ];
 
         for (validator, input, expected) in table_test!(table) {
-            let err: RpcErrorBuilder<String> = RpcErrorBuilder::build(input, None);
+            let err: RpcErrorBuilder<String> = RpcErrorBuilder::build(input.clone(), None);
             let errobj = serde_json::to_string(&err);
             assert!(!errobj.is_err());
 
