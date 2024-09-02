@@ -6,6 +6,7 @@ use crate::handlers::{AgentPingHandler, PING_RPC_METHOD};
 use crate::objects::{RpcErrorBuilder, RpcRequest, RpcResponse};
 use crate::types::{RpcError, RpcHandlerBoxed, RpcMethod, RpcResponseSerialized, RpcRoute};
 
+#[derive(Clone)]
 /// `RpcProcessor` is primary object to manage request method handlers including
 /// for its handler execution
 pub struct RpcProcessor {
