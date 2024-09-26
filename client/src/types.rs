@@ -29,6 +29,15 @@ pub trait RpcValue: Send + Sync + Clone {
     fn build_serde_value(&self) -> Result<Value, ExecutorError>;
 }
 
+#[derive(Clone)]
+pub struct NullValue;
+
+impl RpcValue for NullValue {
+    fn build_serde_value(&self) -> Result<Value, ExecutorError> {
+        Ok(Value::Null)
+    }
+}
+
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(crate = "self::serde")]
 pub struct JSONResponse<T, E>
