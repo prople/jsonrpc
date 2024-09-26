@@ -19,7 +19,7 @@ pub mod objects {
 pub mod handlers {
     use super::*;
 
-    pub use handler::agent_ping::{AgentPingHandler, PING_RPC_METHOD};
+    pub use handler::agent_ping::{AgentPingHandler, AgentPingResponse, PING_RPC_METHOD};
 }
 
 pub mod types {
