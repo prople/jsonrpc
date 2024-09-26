@@ -1,6 +1,6 @@
 use rst_common::standard::async_trait::async_trait;
 use rst_common::standard::erased_serde::Serialize as ErasedSerialized;
-use rst_common::standard::serde::{self, Serialize};
+use rst_common::standard::serde::{self, Deserialize, Serialize};
 use rst_common::standard::serde_json::Value;
 
 use crate::types::{RpcError, RpcHandler, RpcMethod};
@@ -8,7 +8,7 @@ use crate::types::{RpcError, RpcHandler, RpcMethod};
 pub const PING_RPC_METHOD: &str = "prople.vessel.ping";
 
 /// `AgentPingResponse` used as main response object for the RPC method `ping`
-#[derive(Debug, Serialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(crate = "self::serde")]
 pub struct AgentPingResponse {
     message: String,
