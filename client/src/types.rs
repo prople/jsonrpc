@@ -83,7 +83,7 @@ where
     async fn call(
         &self,
         endpoint: String,
-        params: impl RpcValue,
+        params: Option<impl RpcValue>,
         method: String,
         id: Option<RpcId>,
     ) -> Result<JSONResponse<T, Self::ErrorData>, ExecutorError>;

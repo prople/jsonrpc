@@ -46,11 +46,18 @@ where
     async fn call(
         &self,
         endpoint: String,
-        params: impl RpcValue,
+        params: Option<impl RpcValue>,
         method: String,
         id: Option<RpcId>,
     ) -> Result<JSONResponse<T, E>, ExecutorError> {
-        let value_params = params.build_serde_value()?;
+        let value_params = params.map(|val| {
+            let value = val.build_serde_value();
+            if value.is_err() {
+                return None
+            }
+
+            return Some(value.unwrap()) 
+        }).flatten();
 
         let request = RpcRequest {
             jsonrpc: String::from("2.0"),
@@ -146,7 +153,7 @@ mod tests {
         let request_payload = RpcRequest {
             jsonrpc: String::from("2.0"),
             method: String::from("test.rpc"),
-            params: jsonvalue,
+            params: Some(jsonvalue),
             id: Some(RpcId::IntegerVal(1)),
         };
 
@@ -180,7 +187,7 @@ mod tests {
         let resp = client
             .call(
                 endpoint,
-                payload,
+                Some(payload),
                 "test.rpc".to_string(),
                 Some(RpcId::IntegerVal(1)),
             )
@@ -209,7 +216,7 @@ mod tests {
         let request_payload = RpcRequest {
             jsonrpc: String::from("2.0"),
             method: String::from("test.rpc"),
-            params: jsonvalue,
+            params: Some(jsonvalue),
             id: Some(RpcId::IntegerVal(1)),
         };
 
@@ -248,7 +255,7 @@ mod tests {
         let resp = client
             .call(
                 endpoint,
-                payload,
+                Some(payload),
                 "test.rpc".to_string(),
                 Some(RpcId::IntegerVal(1)),
             )
@@ -281,7 +288,7 @@ mod tests {
         let request_payload = RpcRequest {
             jsonrpc: String::from("2.0"),
             method: String::from("test.rpc"),
-            params: jsonvalue,
+            params: Some(jsonvalue),
             id: Some(RpcId::IntegerVal(1)),
         };
 
@@ -304,7 +311,7 @@ mod tests {
         let resp = client
             .call(
                 endpoint,
-                payload,
+                Some(payload),
                 "test.rpc".to_string(),
                 Some(RpcId::IntegerVal(1)),
             )
