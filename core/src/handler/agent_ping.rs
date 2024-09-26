@@ -22,7 +22,7 @@ impl RpcHandler for AgentPingHandler {
     async fn call(
         &self,
         _: RpcMethod,
-        _: Value,
+        _: Option<Value>,
     ) -> Result<Option<Box<dyn ErasedSerialized>>, RpcError> {
         let output = AgentPingResponse {
             message: String::from("pong!"),
@@ -42,7 +42,7 @@ mod tests {
     async fn test_agent_ping_call() {
         let handler = AgentPingHandler;
         let response = handler
-            .call(RpcMethod::from(PING_RPC_METHOD), Value::Null)
+            .call(RpcMethod::from(PING_RPC_METHOD), Some(Value::Null))
             .await;
 
         match response {

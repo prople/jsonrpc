@@ -96,7 +96,7 @@ mod tests {
 
         #[async_trait]
         impl RpcHandler for Handler {
-            async fn call(&self, method: RpcMethod, params: Value) -> Result<Option<RpcResponseSerialized>, RpcError> {
+            async fn call(&self, method: RpcMethod, params: Option<Value>) -> Result<Option<RpcResponseSerialized>, RpcError> {
                 let output = FakeParam{
                     key: String::from("test-key"),
                     value: String::from("test-value")
@@ -117,7 +117,7 @@ mod tests {
             id: Some(RpcId::IntegerVal(1)),
             jsonrpc: String::from("2.0"),
             method: String::from(PING_RPC_METHOD),
-            params: Value::Null,
+            params: Some(Value::Null),
         };
 
         let ping_controller = Box::new(AgentPingHandler);
@@ -171,7 +171,7 @@ mod tests {
             id: Some(RpcId::IntegerVal(1)),
             jsonrpc: String::from("2.0"),
             method: String::from(PING_RPC_METHOD),
-            params: Value::Null,
+            params: Some(Value::Null),
         };
 
         let response = processor.execute(request).await;
@@ -194,7 +194,7 @@ mod tests {
                 .expect_call()
                 .with(
                     predicate::eq(RpcMethod::from("test.mock")),
-                    predicate::eq(Value::Null),
+                    predicate::eq(Some(Value::Null)),
                 )
                 .times(1)
                 .returning(|_, _| Err(RpcError::InvalidParams));
@@ -212,7 +212,7 @@ mod tests {
             id: Some(RpcId::IntegerVal(1)),
             jsonrpc: String::from("2.0"),
             method: String::from("test.mock"),
-            params: Value::Null,
+            params: Some(Value::Null),
         };
 
         let response = processor.execute(request).await;

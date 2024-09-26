@@ -11,7 +11,7 @@ use crate::types::RpcId;
 pub struct RpcRequest {
     pub jsonrpc: String,
     pub method: String,
-    pub params: Value,
+    pub params: Option<Value>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
     pub id: Option<RpcId>,
@@ -27,7 +27,7 @@ mod tests {
         let payload = RpcRequest {
             id: Some(RpcId::IntegerVal(1)),
             jsonrpc: String::from("2.0"),
-            params: json!([1, 2]),
+            params: Some(json!([1, 2])),
             method: String::from("testing"),
         };
 
@@ -43,7 +43,7 @@ mod tests {
         let payload = RpcRequest {
             id: None,
             jsonrpc: String::from("2.0"),
-            params: json!([1, 2]),
+            params: Some(json!([1, 2])),
             method: String::from("testing"),
         };
 
@@ -65,7 +65,9 @@ mod tests {
         assert_eq!(jsonreq.jsonrpc.as_str(), "2.0");
         assert_eq!(jsonreq.method.as_str(), "testing");
 
-        let params = jsonreq.params.as_array().unwrap();
+        let params_unwrapped = jsonreq.params.unwrap();
+        let params = params_unwrapped.as_array().unwrap();
+      
         assert_eq!(params.len(), 2);
         assert_eq!(params[0].as_u64().unwrap(), 1);
         assert_eq!(params[1].as_u64().unwrap(), 2)
@@ -79,8 +81,9 @@ mod tests {
         assert!(!jsonobj.is_err());
         let payload = jsonobj.unwrap();
 
-        assert_eq!("testkey", payload.params.get("key").unwrap());
-        assert_eq!("testvalue", payload.params.get("value").unwrap())
+        let params_unwrapped = payload.params.unwrap();
+        assert_eq!("testkey", params_unwrapped.get("key").unwrap());
+        assert_eq!("testvalue", params_unwrapped.get("value").unwrap())
     }
 
     #[test]
