@@ -30,7 +30,7 @@ impl RpcState {
 pub async fn handler(
     State(state): State<Arc<RpcState>>,
     Json(payload): Json<RpcRequest>,
-) -> (StatusCode, Json<RpcResponse<Box<dyn ErasedSerialized>, ()>>) {
+) -> (StatusCode, Json<RpcResponse<Box<dyn ErasedSerialized>>>) {
     let processor = state.processor.clone();
     let response = processor.execute(payload).await;
 
