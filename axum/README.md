@@ -32,5 +32,5 @@ async fn main() -> Result<(), RpcError> {
 
 ```toml
 [dependencies]
-prople-jsonrpc-axum = {version = "0.2.0"}
+prople-jsonrpc-axum = {version = "0.2.1"}
 ```
