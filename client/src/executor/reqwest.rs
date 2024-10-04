@@ -11,45 +11,38 @@ use prople_jsonrpc_core::types::RpcId;
 use crate::types::{Executor, ExecutorError, JSONResponse, RpcValue};
 
 #[derive(Clone)]
-pub struct Reqwest<T, E>
+pub struct Reqwest<T>
 where
     T: Clone,
-    E: Clone,
 {
     client: Client,
     _phantom0: PhantomData<T>,
-    _phantom1: PhantomData<E>,
 }
 
-impl<T, E> Reqwest<T, E>
+impl<T> Reqwest<T>
 where
     T: Clone,
-    E: Clone,
 {
     pub fn new() -> Self {
         Self {
             client: Client::new(),
             _phantom0: PhantomData::default(),
-            _phantom1: PhantomData::default(),
         }
     }
 }
 
 #[async_trait]
-impl<T, E> Executor<T> for Reqwest<T, E>
+impl<T> Executor<T> for Reqwest<T>
 where
     T: DeserializeOwned + Send + Sync + Debug + Clone,
-    E: DeserializeOwned + Send + Sync + Clone,
 {
-    type ErrorData = E;
-
     async fn call(
         &self,
         endpoint: String,
         params: Option<impl RpcValue>,
         method: String,
         id: Option<RpcId>,
-    ) -> Result<JSONResponse<T, E>, ExecutorError> {
+    ) -> Result<JSONResponse<T>, ExecutorError> {
         let value_params = params.map(|val| {
             let value = val.build_serde_value();
             if value.is_err() {
@@ -87,7 +80,7 @@ where
             })?;
 
         let resp_json = res
-            .json::<JSONResponse<T, Self::ErrorData>>()
+            .json::<JSONResponse<T>>()
             .await
             .map_err(|_| {
                 ExecutorError::ParseResponseError("unable to parse json response".to_string())
@@ -158,7 +151,7 @@ mod tests {
         };
 
         let request_payload_value = serde_json::to_value(request_payload).unwrap();
-        let jsonresp: JSONResponse<FakeResponse, FakeErrorData> = JSONResponse {
+        let jsonresp: JSONResponse<FakeResponse> = JSONResponse {
             id: Some(RpcId::IntegerVal(1)),
             result: Some(FakeResponse {
                 msg: "hello response".to_string(),
@@ -183,7 +176,7 @@ mod tests {
         let url = server.url();
         let endpoint = format!("{}/rpc", url);
 
-        let client = Reqwest::<FakeResponse, FakeErrorData>::new();
+        let client = Reqwest::<FakeResponse>::new();
         let resp = client
             .call(
                 endpoint,
@@ -223,12 +216,9 @@ mod tests {
         let request_payload_value = serde_json::to_value(request_payload).unwrap();
         let error_response = RpcErrorBuilder::build(
             RpcError::InvalidRequest,
-            Some(FakeErrorData {
-                err_msg: "hello error".to_string(),
-            }),
         );
 
-        let jsonresp: JSONResponse<FakeResponse, FakeErrorData> = JSONResponse {
+        let jsonresp: JSONResponse<FakeResponse> = JSONResponse {
             error: Some(error_response),
             id: Some(RpcId::IntegerVal(1)),
             jsonrpc: String::from("2.0"),
@@ -251,7 +241,7 @@ mod tests {
         let url = server.url();
         let endpoint = format!("{}/rpc", url);
 
-        let client = Reqwest::<FakeResponse, FakeErrorData>::new();
+        let client = Reqwest::<FakeResponse>::new();
         let resp = client
             .call(
                 endpoint,
@@ -272,7 +262,6 @@ mod tests {
 
         assert_eq!(error_code, error_rpc.code);
         assert_eq!(error_msg, error_rpc.message);
-        assert_eq!("hello error".to_string(), error_rpc.data.unwrap().err_msg);
     }
 
     #[tokio::test]
@@ -307,7 +296,7 @@ mod tests {
         let url = server.url();
         let endpoint = format!("{}/rpc", url);
 
-        let client = Reqwest::<FakeResponse, FakeErrorData>::new();
+        let client = Reqwest::<FakeResponse>::new();
         let resp = client
             .call(
                 endpoint,

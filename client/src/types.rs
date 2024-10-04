@@ -40,10 +40,9 @@ impl RpcValue for NullValue {
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(crate = "self::serde")]
-pub struct JSONResponse<T, E>
+pub struct JSONResponse<T>
 where
     T: Clone,
-    E: Clone,
 {
     pub jsonrpc: String,
 
@@ -51,21 +50,20 @@ where
     pub result: Option<T>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub error: Option<RpcErrorBuilder<E>>,
+    pub error: Option<RpcErrorBuilder>,
 
     pub id: Option<RpcId>,
 }
 
-impl<T, E> JSONResponse<T, E>
+impl<T> JSONResponse<T>
 where
     T: Clone,
-    E: Clone,
 {
     pub fn is_error(&self) -> bool {
         self.error.is_some()
     }
 
-    pub fn extract_err(&self) -> Result<RpcErrorBuilder<E>, ExecutorError> {
+    pub fn extract_err(&self) -> Result<RpcErrorBuilder, ExecutorError> {
         match &self.error {
             Some(err) => Ok(err.to_owned()),
             None => Err(ExecutorError::MissingError),
@@ -87,13 +85,11 @@ pub trait Executor<T>
 where
     T: DeserializeOwned + Send + Sync + Clone,
 {
-    type ErrorData: DeserializeOwned + Send + Sync + Clone;
-
     async fn call(
         &self,
         endpoint: String,
         params: Option<impl RpcValue>,
         method: String,
         id: Option<RpcId>,
-    ) -> Result<JSONResponse<T, Self::ErrorData>, ExecutorError>;
+    ) -> Result<JSONResponse<T>, ExecutorError>;
 }
