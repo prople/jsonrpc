@@ -13,5 +13,6 @@ rust-version = "1.77"
 license = "GPL-3.0-only"
 
 [workspace.dependencies]
-prople-jsonrpc-core = {version = "~0.4", path = "core"}
-prople-jsonrpc-client = {version = "~0.1", path = "client"}
+prople-jsonrpc-core = {version = "~0.5", path = "core"}
+prople-jsonrpc-client = {version = "~0.2", path = "client"}
+prople-jsonrpc-axum = {version = "~0.2", path = "axum"}
