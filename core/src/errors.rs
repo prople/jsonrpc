@@ -58,21 +58,17 @@ impl RpcError {
 /// including for it's error message
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(crate = "self::serde")]
-pub struct RpcErrorBuilder<T> {
+pub struct RpcErrorBuilder {
     pub code: RpcErrorCode,
     pub message: String,
-
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub data: Option<T>,
 }
 
-impl<T> RpcErrorBuilder<T> {
-    pub fn build(err: RpcError, data: Option<T>) -> Self {
+impl RpcErrorBuilder {
+    pub fn build(err: RpcError) -> Self {
         let (code, message) = err.build();
         RpcErrorBuilder {
             code,
             message: message.to_string(),
-            data,
         }
     }
 }
@@ -145,7 +141,7 @@ mod tests {
         ];
 
         for (validator, input, expected) in table_test!(table) {
-            let err: RpcErrorBuilder<String> = RpcErrorBuilder::build(input.clone(), None);
+            let err: RpcErrorBuilder = RpcErrorBuilder::build(input.clone());
             let errobj = serde_json::to_string(&err);
             assert!(!errobj.is_err());
 

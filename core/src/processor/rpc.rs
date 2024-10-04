@@ -48,15 +48,15 @@ impl RpcProcessor {
     /// it will fetch the handler based on RPC method.
     /// If it have a handler, it will *call* the handler.
     /// If not, it will build the [`RpcErrorObject`] and put it into the [`RpcResponse`]
-    pub async fn execute(&self, request: RpcRequest) -> RpcResponse<RpcResponseSerialized, ()> {
+    pub async fn execute(&self, request: RpcRequest) -> RpcResponse<RpcResponseSerialized> {
         let method = RpcMethod::from(request.method.clone());
         let params = request.params.clone();
 
         let handler = match self.handlers.get(&method) {
             Some(caller) => caller,
             None => {
-                let err_obj: RpcErrorBuilder<()> =
-                    RpcErrorBuilder::build(RpcError::MethodNotFound, None);
+                let err_obj: RpcErrorBuilder =
+                    RpcErrorBuilder::build(RpcError::MethodNotFound);
                 let response = RpcResponse::with_error(Some(err_obj), request.id);
                 return response;
             }
@@ -69,7 +69,7 @@ impl RpcProcessor {
             }
             Err(err) => {
                 error!("error from handler: {}", err.to_string());
-                let err_obj: RpcErrorBuilder<()> = RpcErrorBuilder::build(err, None);
+                let err_obj: RpcErrorBuilder = RpcErrorBuilder::build(err);
                 let response = RpcResponse::with_error(Some(err_obj), request.id);
                 response
             }
