@@ -55,29 +55,6 @@ where
     pub id: Option<RpcId>,
 }
 
-impl<T> JSONResponse<T>
-where
-    T: Clone,
-{
-    pub fn is_error(&self) -> bool {
-        self.error.is_some()
-    }
-
-    pub fn extract_err(&self) -> Result<RpcErrorBuilder, ExecutorError> {
-        match &self.error {
-            Some(err) => Ok(err.to_owned()),
-            None => Err(ExecutorError::MissingError),
-        }
-    }
-
-    pub fn extract_result(&self) -> Result<T, ExecutorError> {
-        match &self.result {
-            Some(result) => Ok(result.to_owned()),
-            None => Err(ExecutorError::MissingResult),
-        }
-    }
-}
-
 /// `Executor` is a main interface that need to implement by
 /// all HTTP client executor
 #[async_trait]
