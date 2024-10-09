@@ -14,5 +14,5 @@ license = "GPL-3.0-only"
 
 [workspace.dependencies]
 prople-jsonrpc-core = {version = "~0.5", path = "core"}
-prople-jsonrpc-client = {version = "~0.2", path = "client"}
+prople-jsonrpc-client = {version = "~0.3", path = "client"}
 prople-jsonrpc-axum = {version = "~0.2", path = "axum"}
